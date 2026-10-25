@@ -10,7 +10,7 @@ export type { TokenPair, TokenSnapshot, TokenStore } from '../auth/token'
 export { YuhengApiError } from '../request/errors'
 
 export interface YuhengUiOptions {
-  apiBaseUrl: string
+  apiBaseUrl?: string
   appTitle?: string
   basePath?: string
   tenantEnabled?: boolean
@@ -76,6 +76,8 @@ export interface RegisterPlatformRoutesOptions {
 
 export interface YuhengUiRuntime {
   install(app: App): void
-  registerRoutes(router: Router): void
+  registerRoutes(router: Router, routes?: readonly PlatformRouteRecord[]): void
   dispose(): void
+  readonly context: import('../runtime/options').YuhengUiContext
+  readonly disposed: boolean
 }

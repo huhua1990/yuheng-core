@@ -1,29 +1,29 @@
-import type { App } from 'vue'
 import type { Router } from 'vue-router'
 import './styles.css'
 import type {
-  PlatformRouteRecord,
   RegisterPlatformRoutesOptions,
-  YuhengRequest,
-  YuhengRequestOptions,
-  YuhengUiOptions,
-  YuhengUiRuntime
 } from './contracts'
+import { platformRoutes } from './router/platform-routes'
+import { registerRoutes } from './router/guards'
 
 export * from './contracts'
 export * from './auth/token'
 export * from './auth/tenant'
 export * from './request'
+export * from './runtime/options'
+export { installYuhengUi } from './runtime/install'
+export * from './router'
+export * from './stores/user'
+export * from './stores/permission'
+export * from './stores/dict'
+export * from './stores/app'
+export * from './stores/tags-view'
 
-export const platformRoutes: readonly PlatformRouteRecord[] = []
-
-export function installYuhengUi(_app: App, _options: YuhengUiOptions): YuhengUiRuntime {
-  throw new Error('installYuhengUi is not implemented')
-}
+export { platformRoutes }
 
 export function registerPlatformRoutes(
-  _router: Router,
-  _options?: RegisterPlatformRoutesOptions
+  router: Router,
+  options?: RegisterPlatformRoutesOptions
 ): void {
-  throw new Error('registerPlatformRoutes is not implemented')
+  registerRoutes(router, options?.routes ?? platformRoutes)
 }
