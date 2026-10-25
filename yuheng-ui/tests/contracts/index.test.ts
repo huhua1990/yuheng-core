@@ -36,9 +36,7 @@ describe('yuheng-ui public contract', () => {
     expect(menu.children).toEqual([])
     expect(options.apiBaseUrl).toBe('/api')
     const names = platformRoutes.map((item) => String(item.name))
-    expect(names).toEqual(
-      expect.arrayContaining(['Login', 'Redirect', 'Profile', 'Error', 'Home', 'NoFound'])
-    )
+    expect(names).toEqual(['Login', 'Redirect', 'Profile', 'Error', 'Home'])
     expect(new Set(names).size).toBe(names.length)
     const request = createYuhengRequest({ apiBaseUrl: '/api' })
     expect(request.get).toBeTypeOf('function')

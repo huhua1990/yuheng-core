@@ -1,7 +1,7 @@
 import type { Router, RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 import type { PlatformRouteRecord } from '../contracts'
-import { platformRoutes } from './platform-routes'
+import { fallbackRoutes, platformRoutes } from './platform-routes'
 import { registerRoutes, resetDynamicRoutes } from './guards'
 
 export interface YuhengRouterOptions {
@@ -25,7 +25,7 @@ export function createYuhengRouter(options: YuhengRouterOptions = {}): YuhengRou
       history: createWebHistory(options.basePath ?? '/'),
       strict: true,
       scrollBehavior: () => ({ top: 0 }),
-      routes: [...platformRoutes, ...(options.routes ?? [])]
+      routes: [...platformRoutes, ...fallbackRoutes, ...(options.routes ?? [])]
     })
   let recoveringImport = false
   let disposed = false
