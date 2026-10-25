@@ -1,0 +1,26 @@
+schemaVersion: 1
+policy:
+  codeVersion: 0.1.0-SNAPSHOT
+  governanceVersion: 0.1.0
+  knowledgeVersion: 0.1.0
+  supportedCode: '>=0.1.0 <1.0.0'
+  supportedGovernance: '>=0.1.0 <1.0.0'
+  supportedKnowledge: '>=0.1.0 <1.0.0'
+contracts:
+  database:
+    baseline: ruoyi-vue-pro@128a0e3bd3
+    firstDialect: mysql
+    tenantField: tenant_id
+  api:
+    responseEnvelope: existing-yudao-response
+    errorCodeSource: yudao-framework-and-ui-errorCode
+  frontend:
+    framework: vue3
+    componentLibrary: element-plus
+  governance:
+    requiredTracks: [server, ui, data]
+    updateMode: manifest-and-sync
+releaseRules:
+  - code and governance may update independently
+  - incompatible combinations are blocked by manifest verification
+  - consumer overlays cannot replace core asset ids

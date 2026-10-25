@@ -1,0 +1,21 @@
+schemaVersion: 1
+codeVersion: 0.1.0-SNAPSHOT
+groupId: com.yuheng
+artifacts:
+  bom: com.yuheng:yuheng-dependencies:0.1.0-SNAPSHOT
+  server: com.yuheng:yuheng-server:0.1.0-SNAPSHOT
+  framework:
+    - com.yuheng:yuheng-common:0.1.0-SNAPSHOT
+    - com.yuheng:yuheng-spring-boot-starter-web:0.1.0-SNAPSHOT
+    - com.yuheng:yuheng-spring-boot-starter-security:0.1.0-SNAPSHOT
+    - com.yuheng:yuheng-spring-boot-starter-mybatis:0.1.0-SNAPSHOT
+    - com.yuheng:yuheng-spring-boot-starter-redis:0.1.0-SNAPSHOT
+    - com.yuheng:yuheng-spring-boot-starter-biz-tenant:0.1.0-SNAPSHOT
+source:
+  repository: /Users/huhua/study/ai/yuheng/ruoyi-vue-pro
+  baseline: 128a0e3bd3
+  packageNamespace: cn.iocoder
+consumerContract:
+  entry: com.yuheng:yuheng-server:0.1.0-SNAPSHOT
+  sourceReference: forbidden
+  governanceManifest: release/yuheng-manifest.yaml

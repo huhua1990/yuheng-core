@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.yuheng</groupId>
+        <artifactId>yuheng</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>yuheng-server</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>
+        Yuheng 对外稳定入口，聚合 framework、system 和 infra。
+        Spring Boot 启动类、运行配置、数据库入口和业务模块留在消费端 bootstrap。
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.yuheng</groupId>
+            <artifactId>yuheng-module-system</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yuheng</groupId>
+            <artifactId>yuheng-module-infra</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yuheng</groupId>
+            <artifactId>yuheng-spring-boot-starter-protection</artifactId>
+        </dependency>
+    </dependencies>
+</project>
