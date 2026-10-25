@@ -4,7 +4,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { installYuhengUi } from '../../src/runtime/install'
 import { usePermissionStore } from '../../src/stores/permission'
 import { useUserStore } from '../../src/stores/user'
-import type { TenantStore } from '../../src/auth/tenant'
+import { createBrowserTenantStore } from '../../src/auth/tenant'
 import { MemoryTokenStore } from '../helpers/memory-token-store'
 
 describe('installYuhengUi', () => {
@@ -63,12 +63,8 @@ describe('installYuhengUi', () => {
   it('clears token, tenant, user and permissions on logout', async () => {
     const tokens = new MemoryTokenStore()
     tokens.setToken({ accessToken: 'access', refreshToken: 'refresh' })
-    const tenant: TenantStore = {
-      context: { tenantId: 'tenant' },
-      getTenantContext() { return this.context },
-      setTenantContext(next) { this.context = { ...this.context, ...next } },
-      clearTenantContext() { this.context = {} }
-    } as TenantStore & { context: Record<string, string> }
+    const tenant = createBrowserTenantStore()
+    tenant.setTenantContext({ tenantId: 'tenant' })
     const context = installYuhengUi(createApp(defineComponent({})), {
       apiBaseUrl: '/api',
       request: { post: async () => undefined } as never,
