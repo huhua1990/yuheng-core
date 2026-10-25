@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
-import type { App } from 'vue'
-import type { Router } from 'vue-router'
+import { createApp, defineComponent } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { describe, expect, it } from 'vitest'
 import {
   YuhengApiError,
@@ -35,16 +35,18 @@ describe('yuheng-ui public contract', () => {
     expect(response.data.ready).toBe(true)
     expect(menu.children).toEqual([])
     expect(options.apiBaseUrl).toBe('/api')
-    expect(platformRoutes).toEqual([])
+    const names = platformRoutes.map((item) => String(item.name))
+    expect(names).toEqual(expect.arrayContaining(['Login', 'Redirect', 'Profile', 'Home', 'NoFound']))
+    expect(new Set(names).size).toBe(names.length)
     const request = createYuhengRequest({ apiBaseUrl: '/api' })
     expect(request.get).toBeTypeOf('function')
     expect(request.postOriginal).toBeTypeOf('function')
-    expect(() => installYuhengUi({} as App, options)).toThrow(
-      'installYuhengUi is not implemented'
-    )
-    expect(() => registerPlatformRoutes({} as Router)).toThrow(
-      'registerPlatformRoutes is not implemented'
-    )
+    const app = createApp(defineComponent({}))
+    const runtime = installYuhengUi(app, options)
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    registerPlatformRoutes(router)
+    expect(router.hasRoute('Login')).toBe(true)
+    runtime.dispose()
   })
 
   it('constructs an API error with its response context', () => {
