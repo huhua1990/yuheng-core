@@ -235,6 +235,27 @@ describe('createYuhengRequest', () => {
     expect(onApiError).toHaveBeenCalledTimes(2)
   })
 
+  it.each([404, 500])(
+    'preserves code and message for HTTP %s JSON download errors encoded as bytes',
+    async (status) => {
+      const adapter = new RecordingAdapter(async (config) => {
+        const body = new TextEncoder().encode(
+          JSON.stringify({ code: status, data: null, msg: `http-${status}` })
+        ).buffer
+        return {
+          ...response(config, body, status),
+          headers: { 'content-type': 'application/json' }
+        }
+      })
+      const request = createYuhengRequest({ apiBaseUrl: '/api', adapter: adapter.adapter })
+
+      await expect(request.download('/http-error-download')).rejects.toMatchObject({
+        code: status,
+        message: `http-${status}`
+      })
+    }
+  )
+
   it.each([404, 500, 901])('converts API code %s to YuhengApiError', async (code) => {
     const adapter = new RecordingAdapter(async (config) =>
       response(config, { code, data: null, msg: `error-${code}` })

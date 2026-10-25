@@ -37,6 +37,23 @@ function isRefreshTokenMessage(message?: string): boolean {
   return message === '无效的刷新令牌' || message === '刷新令牌已过期'
 }
 
+async function decodeJsonBody(response: AxiosResponse): Promise<unknown> {
+  if (isEnvelope(response.data)) return response.data
+  const contentType = String(response.headers?.['content-type'] ?? '').toLowerCase()
+  if (!contentType.includes('json')) return response.data
+  let text: string | undefined
+  if (typeof response.data === 'string') text = response.data
+  else if (response.data instanceof ArrayBuffer) text = new TextDecoder().decode(response.data)
+  else if (response.data instanceof Uint8Array) text = new TextDecoder().decode(response.data)
+  else if (typeof Blob !== 'undefined' && response.data instanceof Blob) text = await response.data.text()
+  if (!text) return response.data
+  try {
+    return JSON.parse(text)
+  } catch {
+    return response.data
+  }
+}
+
 function asApiError(response: ApiResponse, fallbackCode = response.code): YuhengApiError {
   return new YuhengApiError(response.msg || `Yuheng API error (${fallbackCode})`, response.code, response)
 }
@@ -114,6 +131,7 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
   }
 
   const processResponse = async (response: AxiosResponse, originalError?: unknown): Promise<AxiosResponse> => {
+    response.data = await decodeJsonBody(response)
     const body = response.data
     const config = response.config as RetryConfig
     const code = response.status === 401 ? 401 : isEnvelope(body) ? body.code : response.status
@@ -201,24 +219,6 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
         url,
         responseType: config?.responseType ?? 'arraybuffer'
       })
-      const contentType = String(response.headers?.['content-type'] ?? '').toLowerCase()
-      if (contentType.includes('json')) {
-        let text: string | undefined
-        if (typeof response.data === 'string') text = response.data
-        else if (response.data instanceof ArrayBuffer) text = new TextDecoder().decode(response.data)
-        else if (response.data instanceof Uint8Array) text = new TextDecoder().decode(response.data)
-        else if (typeof Blob !== 'undefined' && response.data instanceof Blob) text = await response.data.text()
-        if (text) {
-          try {
-            const parsed: unknown = JSON.parse(text)
-            if (isEnvelope(parsed) && parsed.code !== 0 && parsed.code !== 200) {
-              return reportApiError(asApiError(parsed))
-            }
-          } catch (error) {
-            if (error instanceof YuhengApiError) throw error
-          }
-        }
-      }
       if (isEnvelope(response.data)) return response.data.data as T
       return response.data as T
     },
