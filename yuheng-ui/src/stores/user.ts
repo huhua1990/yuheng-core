@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import type { YuhengUiContext } from '../runtime/options'
 
 export interface UserInfo {
@@ -13,17 +14,17 @@ interface PermissionInfo {
 }
 
 export const useUserStore = defineStore('yuheng-user', () => {
-  let userInfo: UserInfo | null = null
-  let permissions: string[] = []
-  let roles: string[] = []
-  let loaded = false
+  const userInfo = ref<UserInfo | null>(null)
+  const permissions = ref<string[]>([])
+  const roles = ref<string[]>([])
+  const loaded = ref(false)
 
   const fetchUserInfo = async (context: YuhengUiContext): Promise<PermissionInfo> => {
     const result = await context.request.get<PermissionInfo>('/system/auth/get-permission-info')
-    userInfo = (result.user ?? result) as UserInfo
-    permissions = [...(result.permissions ?? [])]
-    roles = [...(result.roles ?? [])]
-    loaded = true
+    userInfo.value = (result.user ?? result) as UserInfo
+    permissions.value = [...(result.permissions ?? [])]
+    roles.value = [...(result.roles ?? [])]
+    loaded.value = true
     return result
   }
 
@@ -36,7 +37,7 @@ export const useUserStore = defineStore('yuheng-user', () => {
       credentials
     )
     if (result?.accessToken) context.tokenStore.setToken(result)
-    loaded = false
+    loaded.value = false
     return result
   }
 
@@ -46,28 +47,20 @@ export const useUserStore = defineStore('yuheng-user', () => {
     } finally {
       context.tokenStore.removeToken()
       context.tenantStore.clearTenantContext()
-      userInfo = null
-      permissions = []
-      roles = []
-      loaded = false
+      userInfo.value = null
+      permissions.value = []
+      roles.value = []
+      loaded.value = false
     }
   }
 
-  const isSetUser = (): boolean => loaded && userInfo !== null
+  const isSetUser = (): boolean => loaded.value && userInfo.value !== null
 
   return {
-    get userInfo() {
-      return userInfo
-    },
-    get permissions() {
-      return permissions
-    },
-    get roles() {
-      return roles
-    },
-    get loaded() {
-      return loaded
-    },
+    userInfo,
+    permissions,
+    roles,
+    loaded,
     fetchUserInfo,
     login,
     logout,

@@ -1,24 +1,21 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 export const useAppStore = defineStore('yuheng-app', () => {
-  let collapsed = false
-  let mobile = false
+  const collapsed = ref(false)
+  const mobile = ref(false)
   const setCollapsed = (value: boolean): void => {
-    collapsed = value
+    collapsed.value = value
   }
   const toggleCollapsed = (): void => {
-    collapsed = !collapsed
+    collapsed.value = !collapsed.value
   }
   const setMobile = (value: boolean): void => {
-    mobile = value
+    mobile.value = value
   }
   return {
-    get collapsed() {
-      return collapsed
-    },
-    get mobile() {
-      return mobile
-    },
+    collapsed,
+    mobile,
     setCollapsed,
     toggleCollapsed,
     setMobile

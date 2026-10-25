@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import type { PlatformRouteRecord, MenuNode } from '../contracts'
 import type { YuhengUiContext } from '../runtime/options'
 import { filterMenuRoutes } from '../router/guards'
 
 export const usePermissionStore = defineStore('yuheng-permission', () => {
-  let addRoutes: PlatformRouteRecord[] = []
-  let initialized = false
+  const addRoutes = ref<PlatformRouteRecord[]>([])
+  const initialized = ref(false)
 
   const generateRoutes = async (
     context: YuhengUiContext,
@@ -19,31 +20,27 @@ export const usePermissionStore = defineStore('yuheng-permission', () => {
         : undefined
     const permissions = directMenus ? menuPermissions : (permissionsOrMenus as string[])
     if (directMenus) {
-      addRoutes = filterMenuRoutes(directMenus, permissions)
+      addRoutes.value = filterMenuRoutes(directMenus, permissions)
     } else {
       const response = await context.request.get<{ menus?: MenuNode[] } | MenuNode[]>(
         '/system/auth/get-permission-info'
       )
       const fetchedMenus = Array.isArray(response) ? response : response.menus ?? []
-      addRoutes = filterMenuRoutes(fetchedMenus, permissions)
+      addRoutes.value = filterMenuRoutes(fetchedMenus, permissions)
     }
-    initialized = true
-    return addRoutes
+    initialized.value = true
+    return addRoutes.value
   }
 
-  const getAddRoutes = (): PlatformRouteRecord[] => [...addRoutes]
+  const getAddRoutes = (): PlatformRouteRecord[] => [...addRoutes.value]
   const resetRoutes = (): void => {
-    addRoutes = []
-    initialized = false
+    addRoutes.value = []
+    initialized.value = false
   }
 
   return {
-    get addRoutes() {
-      return addRoutes
-    },
-    get initialized() {
-      return initialized
-    },
+    addRoutes,
+    initialized,
     generateRoutes,
     getAddRoutes,
     resetRoutes

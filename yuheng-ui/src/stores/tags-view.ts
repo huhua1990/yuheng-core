@@ -1,28 +1,25 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
 export const useTagsViewStore = defineStore('yuheng-tags-view', () => {
-  let visitedViews: RouteLocationNormalizedLoaded[] = []
-  let cachedViews: string[] = []
+  const visitedViews = ref<RouteLocationNormalizedLoaded[]>([])
+  const cachedViews = ref<string[]>([])
   const addView = (view: RouteLocationNormalizedLoaded): void => {
-    if (!visitedViews.some((item) => item.fullPath === view.fullPath)) visitedViews.push(view)
-    if (view.name && !cachedViews.includes(String(view.name))) cachedViews.push(String(view.name))
+    if (!visitedViews.value.some((item) => item.fullPath === view.fullPath)) visitedViews.value.push(view)
+    if (view.name && !cachedViews.value.includes(String(view.name))) cachedViews.value.push(String(view.name))
   }
   const delView = (view: RouteLocationNormalizedLoaded): void => {
-    visitedViews = visitedViews.filter((item) => item.fullPath !== view.fullPath)
-    if (view.name) cachedViews = cachedViews.filter((name) => name !== String(view.name))
+    visitedViews.value = visitedViews.value.filter((item) => item.fullPath !== view.fullPath)
+    if (view.name) cachedViews.value = cachedViews.value.filter((name) => name !== String(view.name))
   }
   const clear = (): void => {
-    visitedViews = []
-    cachedViews = []
+    visitedViews.value = []
+    cachedViews.value = []
   }
   return {
-    get visitedViews() {
-      return visitedViews
-    },
-    get cachedViews() {
-      return cachedViews
-    },
+    visitedViews,
+    cachedViews,
     addView,
     delView,
     clear
