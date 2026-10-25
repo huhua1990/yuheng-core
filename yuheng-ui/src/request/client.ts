@@ -12,6 +12,15 @@ import { createDefaultTokenStore, type TokenPair, type TokenSnapshot, type Token
 import { YuhengApiError } from './errors'
 
 type RetryConfig = InternalAxiosRequestConfig & { __yuhengRetried?: boolean; __yuhengOriginal?: boolean }
+class RefreshFailure extends Error {
+  constructor(
+    readonly reason: UnauthorizedReason,
+    readonly response?: ApiResponse
+  ) {
+    super('Refresh failed')
+    this.name = 'RefreshFailure'
+  }
+}
 
 function isEnvelope(value: unknown): value is ApiResponse {
   return Boolean(value && typeof value === 'object' && 'code' in value && 'data' in value)
@@ -75,15 +84,22 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
       .then((result) => {
         if (!result || (result.code !== 0 && result.code !== 200) || !result.data?.accessToken) {
           const reason = isRefreshTokenMessage(result?.msg) ? 'session-expired' : 'refresh-failed'
-          clearSession(reason)
-          throw asApiError(result ?? { code: 401, data: null, msg: 'Refresh failed' })
+          throw new RefreshFailure(reason, result)
         }
         tokenStore.setToken(result.data)
         return result.data
       })
       .catch((error: unknown) => {
+        if (error instanceof RefreshFailure) {
+          clearSession(error.reason)
+          throw asApiError(error.response ?? { code: 401, data: null, msg: 'Refresh failed' })
+        }
+        const reason =
+          error instanceof YuhengApiError && isRefreshTokenMessage(error.response?.msg)
+            ? 'session-expired'
+            : 'refresh-failed'
+        clearSession(reason)
         if (error instanceof YuhengApiError) throw error
-        clearSession('refresh-failed')
         throw new YuhengApiError('Refresh failed', 401)
       })
       .finally(() => {
@@ -100,7 +116,7 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
   const processResponse = async (response: AxiosResponse, originalError?: unknown): Promise<AxiosResponse> => {
     const body = response.data
     const config = response.config as RetryConfig
-    const code = isEnvelope(body) ? body.code : response.status
+    const code = response.status === 401 ? 401 : isEnvelope(body) ? body.code : response.status
     if (code === 401 && !config.__yuhengRetried) {
       try {
         await refreshAccessToken()
@@ -185,6 +201,24 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
         url,
         responseType: config?.responseType ?? 'arraybuffer'
       })
+      const contentType = String(response.headers?.['content-type'] ?? '').toLowerCase()
+      if (contentType.includes('json')) {
+        let text: string | undefined
+        if (typeof response.data === 'string') text = response.data
+        else if (response.data instanceof ArrayBuffer) text = new TextDecoder().decode(response.data)
+        else if (response.data instanceof Uint8Array) text = new TextDecoder().decode(response.data)
+        else if (typeof Blob !== 'undefined' && response.data instanceof Blob) text = await response.data.text()
+        if (text) {
+          try {
+            const parsed: unknown = JSON.parse(text)
+            if (isEnvelope(parsed) && parsed.code !== 0 && parsed.code !== 200) {
+              return reportApiError(asApiError(parsed))
+            }
+          } catch (error) {
+            if (error instanceof YuhengApiError) throw error
+          }
+        }
+      }
       if (isEnvelope(response.data)) return response.data.data as T
       return response.data as T
     },

@@ -142,4 +142,134 @@ describe('createYuhengRequest', () => {
     expect(tokens.getAccessToken()).toBeUndefined()
     expect(onUnauthorized).toHaveBeenCalledWith('refresh-failed')
   })
+
+  it('refreshes an HTTP 401 even when the envelope body reports code 0', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'old', refreshToken: 'refresh' })
+    let unauthorized = true
+    const adapter = new RecordingAdapter(async (config) => {
+      if (unauthorized) {
+        unauthorized = false
+        return response(config, { code: 0, data: null }, 401)
+      }
+      return response(config, { code: 0, data: { ok: true } })
+    })
+    const refreshToken = vi.fn(async () => ({
+      code: 0,
+      data: { accessToken: 'new', refreshToken: 'refresh-2' }
+    }))
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      adapter: adapter.adapter,
+      refreshToken
+    })
+
+    await expect(request.get('/private')).resolves.toEqual({ ok: true })
+    expect(refreshToken).toHaveBeenCalledTimes(1)
+  })
+
+  it('clears the session when the refresh callback rejects', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'old', refreshToken: 'refresh' })
+    const onUnauthorized = vi.fn()
+    const adapter = new RecordingAdapter(async (config) =>
+      response(config, { code: 401, data: null, msg: 'expired' })
+    )
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      adapter: adapter.adapter,
+      refreshToken: async () => {
+        throw new YuhengApiError('network down', 0)
+      },
+      onUnauthorized
+    })
+
+    await expect(request.get('/private')).rejects.toBeInstanceOf(YuhengApiError)
+    expect(tokens.getAccessToken()).toBeUndefined()
+    expect(tokens.getRefreshToken()).toBeUndefined()
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+    expect(onUnauthorized).toHaveBeenCalledWith('refresh-failed')
+  })
+
+  it('decodes JSON download errors while preserving binary downloads', async () => {
+    const onApiError = vi.fn()
+    const adapter = new RecordingAdapter(async (config) => {
+      if (config.url?.includes('/error-download-blob')) {
+        return {
+          ...response(
+            config,
+            new Blob([JSON.stringify({ code: 404, data: null, msg: 'blob failed' })]),
+            200
+          ),
+          headers: { 'content-type': 'application/json' }
+        }
+      }
+      if (config.url?.includes('/error-download')) {
+        const body = new TextEncoder().encode(
+          JSON.stringify({ code: 500, data: null, msg: 'download failed' })
+        ).buffer
+        return {
+          ...response(config, body, 200),
+          headers: { 'content-type': 'application/json' }
+        }
+      }
+      return response(config, new Uint8Array([1, 2, 3]), 200)
+    })
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      adapter: adapter.adapter,
+      onApiError
+    })
+
+    await expect(request.download('/binary')).resolves.toEqual(new Uint8Array([1, 2, 3]))
+    await expect(request.download('/error-download')).rejects.toMatchObject({
+      code: 500,
+      message: 'download failed'
+    })
+    await expect(request.download('/error-download-blob')).rejects.toMatchObject({
+      code: 404,
+      message: 'blob failed'
+    })
+    expect(onApiError).toHaveBeenCalledTimes(2)
+  })
+
+  it.each([404, 500, 901])('converts API code %s to YuhengApiError', async (code) => {
+    const adapter = new RecordingAdapter(async (config) =>
+      response(config, { code, data: null, msg: `error-${code}` })
+    )
+    const request = createYuhengRequest({ apiBaseUrl: '/api', adapter: adapter.adapter })
+
+    await expect(request.get('/error')).rejects.toMatchObject({
+      code,
+      message: `error-${code}`
+    })
+  })
+
+  it('does not report ignored refresh-token messages as API errors', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'old', refreshToken: 'refresh' })
+    const onApiError = vi.fn()
+    const onUnauthorized = vi.fn()
+    const adapter = new RecordingAdapter(async (config) =>
+      response(config, { code: 401, data: null, msg: 'expired' })
+    )
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      adapter: adapter.adapter,
+      refreshToken: async () => ({
+        code: 401,
+        data: { accessToken: '', refreshToken: '' },
+        msg: '刷新令牌已过期'
+      }),
+      onApiError,
+      onUnauthorized
+    })
+
+    await expect(request.get('/private')).rejects.toBeInstanceOf(YuhengApiError)
+    expect(onApiError).not.toHaveBeenCalled()
+    expect(onUnauthorized).toHaveBeenCalledWith('session-expired')
+  })
 })
