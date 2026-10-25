@@ -39,7 +39,16 @@ function isRefreshTokenMessage(message?: string): boolean {
 
 async function decodeJsonBody(response: AxiosResponse): Promise<unknown> {
   if (isEnvelope(response.data)) return response.data
-  const contentType = String(response.headers?.['content-type'] ?? '').toLowerCase()
+  const headers = response.headers as {
+    get?: (name: string) => unknown
+    [key: string]: unknown
+  }
+  const contentType = String(
+    (typeof headers?.get === 'function' ? headers.get('content-type') : undefined) ??
+      headers?.['content-type'] ??
+      headers?.['Content-Type'] ??
+      ''
+  ).toLowerCase()
   if (!contentType.includes('json')) return response.data
   let text: string | undefined
   if (typeof response.data === 'string') text = response.data

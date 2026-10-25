@@ -244,7 +244,7 @@ describe('createYuhengRequest', () => {
         ).buffer
         return {
           ...response(config, body, status),
-          headers: { 'content-type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' }
         }
       })
       const request = createYuhengRequest({ apiBaseUrl: '/api', adapter: adapter.adapter })
