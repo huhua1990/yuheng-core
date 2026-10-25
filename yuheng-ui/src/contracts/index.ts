@@ -4,6 +4,7 @@ import type { Pinia } from 'pinia'
 import type { RouteRecordRaw, Router } from 'vue-router'
 import type { TenantStore } from '../auth/tenant'
 import type { TokenPair, TokenStore } from '../auth/token'
+import type { PlatformLocale } from '../locales'
 import { YuhengApiError } from '../request/errors'
 
 export type { TenantContext, TenantStore } from '../auth/tenant'
@@ -18,6 +19,8 @@ export interface YuhengUiOptions {
   loginPath?: string
   whiteList?: string[]
   requestTimeout?: number
+  locale?: PlatformLocale
+  icons?: Record<string, unknown>
   platformRoutes?: PlatformRouteRecord[]
   onUnauthorized?: (reason: UnauthorizedReason) => void
   onApiError?: (error: YuhengApiError) => void

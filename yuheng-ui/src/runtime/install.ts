@@ -21,7 +21,7 @@ export function installYuhengUi(
   overrides: Partial<Pick<YuhengUiContext, 'request' | 'tokenStore' | 'tenantStore' | 'pinia'>> = {}
 ): InstalledYuhengUiRuntime {
   const context = createYuhengUiContext(options, overrides)
-  setupYuhengPlugins(app)
+  setupYuhengPlugins(app, { locale: options.locale, icons: options.icons })
   const userStore = useUserStore(context.pinia)
   const dictStore = useDictStore(context.pinia)
   const permissionStore = usePermissionStore(context.pinia)
