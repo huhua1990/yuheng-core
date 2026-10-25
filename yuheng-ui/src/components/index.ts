@@ -1,4 +1,4 @@
-import type { App } from 'vue'
+import type { App, Component } from 'vue'
 import ConfigGlobal from './ConfigGlobal.vue'
 import ContentDetailWrap from './ContentDetailWrap.vue'
 import ContentWrap from './ContentWrap.vue'
@@ -13,8 +13,20 @@ import Backtop from './Backtop.vue'
 
 export { Backtop, ConfigGlobal, ContentDetailWrap, ContentWrap, Dialog, Error, Form, Icon, Pagination, Table, UploadFile }
 
+const platformComponents: ReadonlyArray<readonly [string, Component]> = [
+  ['Backtop', Backtop],
+  ['ConfigGlobal', ConfigGlobal],
+  ['ContentDetailWrap', ContentDetailWrap],
+  ['ContentWrap', ContentWrap],
+  ['Dialog', Dialog],
+  ['Error', Error],
+  ['Form', Form],
+  ['Icon', Icon],
+  ['Pagination', Pagination],
+  ['Table', Table],
+  ['UploadFile', UploadFile]
+]
+
 export function setupYuhengComponents(app: App): void {
-  ;[Backtop, ConfigGlobal, ContentDetailWrap, ContentWrap, Dialog, Error, Form, Icon, Pagination, Table, UploadFile].forEach((component) => {
-    if (component.name) app.component(component.name, component)
-  })
+  for (const [name, component] of platformComponents) app.component(name, component)
 }

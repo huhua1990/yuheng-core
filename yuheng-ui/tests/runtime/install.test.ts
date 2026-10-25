@@ -1,18 +1,31 @@
 import { defineComponent, createApp } from 'vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { installYuhengUi } from '../../src/runtime/install'
+import { usePermissionStore } from '../../src/stores/permission'
+import { useUserStore } from '../../src/stores/user'
+import type { TenantStore } from '../../src/auth/tenant'
+import { MemoryTokenStore } from '../helpers/memory-token-store'
 
 describe('installYuhengUi', () => {
   it('installs into an existing app without creating or mounting another app', () => {
+    const originalDocument = globalThis.document
+    const querySelector = vi.fn()
+    Object.defineProperty(globalThis, 'document', { configurable: true, value: { querySelector } })
     const app = createApp(defineComponent({ template: '<div />' }))
+    const mount = vi.spyOn(app, 'mount')
     const runtime = installYuhengUi(app, { apiBaseUrl: '/api' })
 
     expect(runtime.context.request).toBeDefined()
     expect(runtime.context.tokenStore).toBeDefined()
     expect(runtime.context.tenantStore).toBeDefined()
     expect(runtime.context.pinia).toBeDefined()
-    expect((app as unknown as { _context: { directives: Record<string, unknown> } })._context.directives.focus).toBeDefined()
+    const appContext = (app as unknown as { _context: { directives: Record<string, unknown>; components: Record<string, unknown> } })._context
+    expect(appContext.directives.focus).toBeDefined()
+    expect(appContext.components.ConfigGlobal).toBeDefined()
+    expect(appContext.components.Dialog).toBeDefined()
+    expect(querySelector).not.toHaveBeenCalledWith('#app')
+    expect(mount).not.toHaveBeenCalled()
 
     const router = createRouter({ history: createMemoryHistory(), routes: [] })
     runtime.registerRoutes(router)
@@ -20,6 +33,7 @@ describe('installYuhengUi', () => {
 
     runtime.dispose()
     expect(runtime.disposed).toBe(true)
+    Object.defineProperty(globalThis, 'document', { configurable: true, value: originalDocument })
   })
 
   it('does not share stores between two runtime instances', () => {
@@ -44,5 +58,37 @@ describe('installYuhengUi', () => {
 
     expect(router.currentRoute.value.fullPath).toBe('/protected')
     expect(runtime.context.initialized).toBe(false)
+  })
+
+  it('clears token, tenant, user and permissions on logout', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'access', refreshToken: 'refresh' })
+    const tenant: TenantStore = {
+      context: { tenantId: 'tenant' },
+      getTenantContext() { return this.context },
+      setTenantContext(next) { this.context = { ...this.context, ...next } },
+      clearTenantContext() { this.context = {} }
+    } as TenantStore & { context: Record<string, string> }
+    const context = installYuhengUi(createApp(defineComponent({})), {
+      apiBaseUrl: '/api',
+      request: { post: async () => undefined } as never,
+      tokenStore: tokens,
+      tenantStore: tenant
+    }).context
+    const user = useUserStore(context.pinia)
+    const permissions = usePermissionStore(context.pinia)
+    user.userInfo = { id: 1 }
+    user.permissions = ['system:user:query']
+    user.loaded = true
+    permissions.addRoutes = [{ name: 'Dynamic', path: '/dynamic', component: { render: () => null } }]
+
+    await user.logout(context)
+    permissions.resetRoutes()
+
+    expect(tokens.getAccessToken()).toBeUndefined()
+    expect(tenant.getTenantContext()).toEqual({})
+    expect(user.userInfo).toBeNull()
+    expect(user.permissions).toEqual([])
+    expect(permissions.getAddRoutes()).toEqual([])
   })
 })

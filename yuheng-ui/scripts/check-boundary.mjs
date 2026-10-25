@@ -4,11 +4,11 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../src', import.meta.url))
 const patterns = [
-  'yudao-ui-admin-vue3',
-  'yuheng-demo-ui',
-  "from '@/api/bpm",
-  "from '@/views/crm",
-  "from 'yuheng-ui/src/"
+  /yudao-ui-admin-vue3/,
+  /yuheng-demo-ui/,
+  /from ['\"]@\/api\/bpm/,
+  /from ['\"]@\/views\/crm/,
+  /from ['\"]yuheng-ui\/src\//
 ]
 const violations = []
 function walk(directory) {
@@ -19,7 +19,7 @@ function walk(directory) {
     else if (stat.isFile()) {
       const lines = readFileSync(file, 'utf8').split(/\r?\n/)
       lines.forEach((line, index) => {
-        if (patterns.some((pattern) => line.includes(pattern))) violations.push(`${relative(root, file)}:${index + 1}: ${line.trim()}`)
+        if (patterns.some((pattern) => pattern.test(line))) violations.push(`${relative(root, file)}:${index + 1}: ${line.trim()}`)
       })
     }
   }

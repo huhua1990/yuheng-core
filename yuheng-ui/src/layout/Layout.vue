@@ -1,15 +1,24 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { useAppStore } from '../stores/app'
 import { useUserStore } from '../stores/user'
+import { usePermissionStore } from '../stores/permission'
+import { YUHENG_UI_CONTEXT, type YuhengUiContext } from '../runtime/options'
 
-const appStore = useAppStore()
-const userStore = useUserStore()
+const context = inject<YuhengUiContext | undefined>(YUHENG_UI_CONTEXT)
+const appStore = context ? useAppStore(context.pinia) : useAppStore()
+const userStore = context ? useUserStore(context.pinia) : useUserStore()
+const permissionStore = context ? usePermissionStore(context.pinia) : usePermissionStore()
 const router = useRouter()
 const sidebarWidth = computed(() => appStore.collapsed ? '64px' : 'var(--yuheng-ui-sidebar-width)')
 const logout = async () => {
-  userStore.userInfo = null
+  if (context) {
+    await userStore.logout(context)
+    permissionStore.resetRoutes()
+  } else {
+    userStore.userInfo = null
+  }
   await router.push('/login')
 }
 </script>
