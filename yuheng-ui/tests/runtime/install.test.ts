@@ -30,4 +30,18 @@ describe('installYuhengUi', () => {
     first.dispose()
     second.dispose()
   })
+
+  it('makes existing router guards inert after disposal', async () => {
+    const app = createApp(defineComponent({}))
+    const runtime = installYuhengUi(app, { apiBaseUrl: '/api' })
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    runtime.registerRoutes(router)
+    router.addRoute({ name: 'Protected', path: '/protected', component: { render: () => null } })
+
+    runtime.dispose()
+    await router.push('/protected')
+
+    expect(router.currentRoute.value.fullPath).toBe('/protected')
+    expect(runtime.context.initialized).toBe(false)
+  })
 })

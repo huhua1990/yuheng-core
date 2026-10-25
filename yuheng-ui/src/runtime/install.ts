@@ -59,6 +59,7 @@ export function installYuhengUi(
       if (routes) registerRoutes(router, routes)
       if (!guardedRouters.has(router)) {
         router.beforeEach(async (to) => {
+          if (disposed) return true
           const result = await resolveNavigation(to.fullPath, createContextNavigation(context))
           if (context.initialized) registerRoutes(router, permissionStore.getAddRoutes())
           return result
