@@ -9,6 +9,7 @@ import { useDictStore } from '../stores/dict'
 import { usePermissionStore } from '../stores/permission'
 import { useUserStore } from '../stores/user'
 import { setupYuhengPlugins } from '../plugins'
+import { configureSystemRequest } from '../modules/system/api/request'
 
 export interface InstalledYuhengUiRuntime extends YuhengUiRuntime {
   readonly context: YuhengUiContext
@@ -21,6 +22,7 @@ export function installYuhengUi(
   overrides: Partial<Pick<YuhengUiContext, 'request' | 'tokenStore' | 'tenantStore' | 'pinia'>> = {}
 ): InstalledYuhengUiRuntime {
   const context = createYuhengUiContext(options, overrides)
+  configureSystemRequest(context.request)
   setupYuhengPlugins(app, { locale: options.locale, icons: options.icons })
   const userStore = useUserStore(context.pinia)
   const dictStore = useDictStore(context.pinia)
