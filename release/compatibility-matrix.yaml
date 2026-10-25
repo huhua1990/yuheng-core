@@ -16,7 +16,14 @@ contracts:
     errorCodeSource: yudao-framework-and-ui-errorCode
   frontend:
     framework: vue3
+    frameworkVersion: 3.5.x
+    router: vue-router
+    routerVersion: 5.x
+    state: pinia
+    stateVersion: 3.x
     componentLibrary: element-plus
+    componentLibraryVersion: 2.x
+    artifact: yuheng-ui@0.1.0-SNAPSHOT
   governance:
     requiredTracks: [server, ui, data]
     updateMode: manifest-and-sync

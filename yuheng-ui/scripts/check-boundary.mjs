@@ -6,9 +6,11 @@ const root = fileURLToPath(new URL('../src', import.meta.url))
 const patterns = [
   /yudao-ui-admin-vue3/,
   /yuheng-demo-ui/,
+  /\/Users\/huhua\/study\/ai\/yuheng\/yudao-ui-admin-vue3/,
+  /from ['\"]yuheng-ui\/src\//,
+  /from ['\"]@\/(?:api|views)\/(?:ai|ai1|bpm|crm|erp|fms|hrm|im|iot|mall|member|mes|mp|oa|pay|pms|report|wms)(?:\/|['\"])/,
   /from ['\"]@\/api\/bpm/,
-  /from ['\"]@\/views\/crm/,
-  /from ['\"]yuheng-ui\/src\//
+  /from ['\"]@\/views\/crm/
 ]
 const violations = []
 function walk(directory) {
