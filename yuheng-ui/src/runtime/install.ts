@@ -30,7 +30,7 @@ export function installYuhengUi(
         const permissionInfo = await userStore.fetchUserInfo(context)
         await dictStore.fetchDict(context).catch(() => undefined)
         const menus = Array.isArray(permissionInfo.menus) ? permissionInfo.menus : []
-        await permissionStore.generateRoutes(context, menus as MenuNode[])
+        await permissionStore.generateRoutes(context, menus as MenuNode[], [], 'menus')
         context.initialized = true
       })().finally(() => {
         context.initialization = undefined

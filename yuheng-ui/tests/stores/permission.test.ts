@@ -46,4 +46,13 @@ describe('permission store', () => {
     expect(first.getAddRoutes()).toHaveLength(0)
     expect(addedNames).toHaveLength(1)
   })
+
+  it('accepts an empty menu response without refetching permission info', async () => {
+    const get = async () => ({ menus: [] })
+    const store = usePermissionStore()
+    const context = { request: { get } } as unknown as YuhengUiContext
+
+    await expect(store.generateRoutes(context, [], [], 'menus')).resolves.toEqual([])
+    expect(store.getAddRoutes()).toEqual([])
+  })
 })

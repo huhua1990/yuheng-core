@@ -10,7 +10,8 @@ export interface PermissionStoreSetup {
   generateRoutes(
     context: YuhengUiContext,
     permissionsOrMenus?: string[] | MenuNode[],
-    menuPermissions?: string[]
+    menuPermissions?: string[],
+    source?: 'menus' | 'permissions'
   ): Promise<PlatformRouteRecord[]>
   getAddRoutes(): PlatformRouteRecord[]
   resetRoutes(): void
@@ -25,10 +26,12 @@ export const usePermissionStore = defineStore(
     const generateRoutes = async (
       context: YuhengUiContext,
       permissionsOrMenus: string[] | MenuNode[] = [],
-      menuPermissions: string[] = []
+      menuPermissions: string[] = [],
+      source?: 'menus' | 'permissions'
     ): Promise<PlatformRouteRecord[]> => {
       const directMenus =
-        permissionsOrMenus.length > 0 && typeof permissionsOrMenus[0] === 'object'
+        source === 'menus' ||
+        (permissionsOrMenus.length > 0 && typeof permissionsOrMenus[0] === 'object')
           ? (permissionsOrMenus as MenuNode[])
           : undefined
       const permissions = directMenus ? menuPermissions : (permissionsOrMenus as string[])
