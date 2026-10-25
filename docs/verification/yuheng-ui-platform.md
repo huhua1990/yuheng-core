@@ -5,7 +5,7 @@
 ## 版本与基线
 
 - 只读前端基线：`yudao-ui-admin-vue3@050bac1eccfbe7393a1568d614151cc99501b949`，验证时 `git status --short` 为空。
-- 平台包实现提交：`yuheng-core` 分支 `feat/yuheng-ui-platform`，Task 5 提交 `8f1d87b`，Task 6 提交 `0d56e62`。
+- 平台包实现提交：`yuheng-core` 分支 `feat/yuheng-ui-platform`，最终验证提交 `a152cf4`（含 Task 5 `8f1d87b`、Task 6 `0d56e62`）。
 - 平台包版本：`yuheng-ui@0.1.0-SNAPSHOT`。
 - 消费端提交：`yuheng-demo` 分支 `feat/yuheng-demo-ui`，`c7efc4b`（消费端）和 `6877e54`（manifest）。
 - 消费端版本：`yuheng-demo-ui@0.1.0-SNAPSHOT`。
@@ -15,7 +15,7 @@
 工作目录：`yuheng-core/yuheng-ui`，命令使用 Node 22.23.2：
 
 ```text
-pnpm test                         10 files, 43 tests passed
+pnpm test                         12 files, 45 tests passed
 pnpm run typecheck                passed
 pnpm run build                    passed
 node scripts/check-boundary.mjs   yuheng-ui boundary: PASS
