@@ -8,7 +8,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": {
+      "types": "./dist/styles.css.d.ts",
+      "import": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    }
   },
   "files": [
     "dist",

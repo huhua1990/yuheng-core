@@ -1,12 +1,24 @@
 import { fileURLToPath, URL } from 'node:url'
 import vue from '@vitejs/plugin-vue'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
+
+const cssDeclarationPlugin: Plugin = {
+  name: 'yuheng-ui-css-declaration',
+  generateBundle() {
+    this.emitFile({
+      type: 'asset',
+      fileName: 'styles.css.d.ts',
+      source: 'declare const css: string\nexport default css\n'
+    })
+  }
+}
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), cssDeclarationPlugin],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@yuheng-ui': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
   build: {

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import type { App } from 'vue'
 import type { Router } from 'vue-router'
 import { describe, expect, it } from 'vitest'
@@ -13,7 +14,7 @@ import type {
   MenuNode,
   PlatformRouteRecord,
   YuhengUiOptions
-} from '../../src/contracts'
+} from '@yuheng-ui/contracts'
 
 describe('yuheng-ui public contract', () => {
   it('exports the documented types and runtime entry points', () => {
@@ -54,5 +55,19 @@ describe('yuheng-ui public contract', () => {
     expect(error.code).toBe(401)
     expect(error.response).toBe(response)
     expect(error.message).toBe('Unauthorized')
+  })
+
+  it('publishes a declaration condition for the stylesheet export', () => {
+    const packageJson = JSON.parse(
+      readFileSync(new URL('../../package.json', import.meta.url), 'utf8')
+    ) as {
+      exports: {
+        './styles.css': {
+          types?: string
+        }
+      }
+    }
+
+    expect(packageJson.exports['./styles.css'].types).toBe('./dist/styles.css.d.ts')
   })
 })

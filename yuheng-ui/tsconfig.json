@@ -4,6 +4,11 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@yuheng-ui/*": ["src/*"]
+    },
     "strict": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
