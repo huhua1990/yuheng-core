@@ -36,9 +36,9 @@ describe('yuheng-ui public contract', () => {
     expect(menu.children).toEqual([])
     expect(options.apiBaseUrl).toBe('/api')
     expect(platformRoutes).toEqual([])
-    expect(() => createYuhengRequest({ apiBaseUrl: '/api' })).toThrow(
-      'createYuhengRequest is not implemented'
-    )
+    const request = createYuhengRequest({ apiBaseUrl: '/api' })
+    expect(request.get).toBeTypeOf('function')
+    expect(request.postOriginal).toBeTypeOf('function')
     expect(() => installYuhengUi({} as App, options)).toThrow(
       'installYuhengUi is not implemented'
     )

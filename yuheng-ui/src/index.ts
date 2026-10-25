@@ -11,12 +11,11 @@ import type {
 } from './contracts'
 
 export * from './contracts'
+export * from './auth/token'
+export * from './auth/tenant'
+export * from './request'
 
 export const platformRoutes: readonly PlatformRouteRecord[] = []
-
-export function createYuhengRequest(_options: YuhengRequestOptions): YuhengRequest {
-  throw new Error('createYuhengRequest is not implemented')
-}
 
 export function installYuhengUi(_app: App, _options: YuhengUiOptions): YuhengUiRuntime {
   throw new Error('installYuhengUi is not implemented')
