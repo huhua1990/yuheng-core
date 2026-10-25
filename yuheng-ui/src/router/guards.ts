@@ -15,6 +15,7 @@ export interface NavigationContext {
   token?: string
   initialized: boolean
   initialize?: () => void | Promise<void>
+  initialization?: Promise<void>
   whiteList?: readonly string[]
   loginPath?: string
 }
@@ -39,8 +40,13 @@ export async function resolveNavigation(
   }
   if (!context.token) return `${loginPath}?redirect=${encodeURIComponent(path)}`
   if (!context.initialized) {
-    await context.initialize?.()
-    context.initialized = true
+    if (!context.initialization) {
+      context.initialization = Promise.resolve(context.initialize?.()).then(() => {
+        context.initialized = true
+      })
+    }
+    await context.initialization
+    context.initialization = undefined
   }
   return path
 }

@@ -12,6 +12,7 @@ export interface YuhengRouterOptions {
 
 export interface YuhengRouterRuntime {
   router: Router
+  readonly disposed: boolean
   registerRoutes(router: Router, routes?: readonly PlatformRouteRecord[]): void
   resetRoutes(router?: Router): void
   dispose(): void
@@ -27,8 +28,10 @@ export function createYuhengRouter(options: YuhengRouterOptions = {}): YuhengRou
       routes: [...platformRoutes, ...(options.routes ?? [])]
     })
   let recoveringImport = false
+  let disposed = false
   router.onError((error, to) => {
     if (
+      !disposed &&
       !recoveringImport &&
       /failed to fetch dynamically imported module|importing a module script failed|chunk load/i.test(
         String(error)
@@ -41,15 +44,21 @@ export function createYuhengRouter(options: YuhengRouterOptions = {}): YuhengRou
     }
   })
   const register = (target: Router, routes: readonly PlatformRouteRecord[] = platformRoutes) => {
+    if (disposed) return
     registerRoutes(target, routes)
   }
   const dispose = (): void => {
-    router.removeRoute
+    disposed = true
   }
   return {
     router,
+    get disposed() {
+      return disposed
+    },
     registerRoutes: (target, routes = platformRoutes) => register(target, routes),
-    resetRoutes: (target = router) => resetDynamicRoutes(target),
+    resetRoutes: (target = router) => {
+      if (!disposed) resetDynamicRoutes(target)
+    },
     dispose
   }
 }

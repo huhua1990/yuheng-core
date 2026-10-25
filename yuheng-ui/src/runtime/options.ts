@@ -13,6 +13,7 @@ export interface YuhengUiContext {
   pinia: Pinia
   initialized: boolean
   initialize?: () => void | Promise<void>
+  initialization?: Promise<void>
 }
 
 export function createYuhengUiContext(

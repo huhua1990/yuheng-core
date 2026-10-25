@@ -25,11 +25,18 @@ export function installYuhengUi(
   const permissionStore = usePermissionStore(context.pinia)
   context.initialize = async () => {
     if (context.initialized) return
-    const permissionInfo = await userStore.fetchUserInfo(context)
-    await dictStore.fetchDict(context).catch(() => undefined)
-    const menus = Array.isArray(permissionInfo.menus) ? permissionInfo.menus : []
-    await permissionStore.generateRoutes(context, menus as MenuNode[])
-    context.initialized = true
+    if (!context.initialization) {
+      context.initialization = (async () => {
+        const permissionInfo = await userStore.fetchUserInfo(context)
+        await dictStore.fetchDict(context).catch(() => undefined)
+        const menus = Array.isArray(permissionInfo.menus) ? permissionInfo.menus : []
+        await permissionStore.generateRoutes(context, menus as MenuNode[])
+        context.initialized = true
+      })().finally(() => {
+        context.initialization = undefined
+      })
+    }
+    await context.initialization
   }
   let disposed = false
   const guardedRouters = new WeakSet<Router>()
@@ -51,9 +58,11 @@ export function installYuhengUi(
       registerRoutes(router, options.platformRoutes ?? platformRoutes)
       if (routes) registerRoutes(router, routes)
       if (!guardedRouters.has(router)) {
-        router.beforeEach((to) =>
-          resolveNavigation(to.fullPath, createContextNavigation(context))
-        )
+        router.beforeEach(async (to) => {
+          const result = await resolveNavigation(to.fullPath, createContextNavigation(context))
+          if (context.initialized) registerRoutes(router, permissionStore.getAddRoutes())
+          return result
+        })
         guardedRouters.add(router)
       }
     },

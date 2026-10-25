@@ -44,6 +44,22 @@ describe('platform route guards', () => {
     expect(context.initialized).toBe(true)
   })
 
+  it('shares one in-flight initialization across concurrent navigations', async () => {
+    let release!: () => void
+    const initialize = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve
+        })
+    )
+    const context = { token: 'access-token', initialized: false, initialize }
+    const first = resolveNavigation('/system/user', context)
+    const second = resolveNavigation('/system/role', context)
+    expect(initialize).toHaveBeenCalledTimes(1)
+    release()
+    await expect(Promise.all([first, second])).resolves.toEqual(['/system/user', '/system/role'])
+  })
+
   it('filters permissioned menu routes while preserving accessible containers', () => {
     const routes = filterMenuRoutes(
       [
@@ -86,5 +102,16 @@ describe('platform route guards', () => {
     expect(router.hasRoute('DynamicUser')).toBe(false)
     expect(router.hasRoute('Login')).toBe(true)
     expect(router.hasRoute('Home')).toBe(true)
+  })
+
+  it('disposes the router runtime and blocks later route mutations', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    const runtime = createYuhengRouter({ router })
+    runtime.dispose()
+    expect(runtime.disposed).toBe(true)
+    runtime.registerRoutes(router, [
+      { name: 'AfterDispose', path: '/after-dispose', component: { render: () => null } }
+    ])
+    expect(router.hasRoute('AfterDispose')).toBe(false)
   })
 })
