@@ -12,6 +12,7 @@ describe('installYuhengUi', () => {
     expect(runtime.context.tokenStore).toBeDefined()
     expect(runtime.context.tenantStore).toBeDefined()
     expect(runtime.context.pinia).toBeDefined()
+    expect((app as unknown as { _context: { directives: Record<string, unknown> } })._context.directives.focus).toBeDefined()
 
     const router = createRouter({ history: createMemoryHistory(), routes: [] })
     runtime.registerRoutes(router)

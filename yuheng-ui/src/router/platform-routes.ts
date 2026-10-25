@@ -1,16 +1,19 @@
 import type { PlatformRouteRecord } from '../contracts'
-
-const placeholder = { render: () => null }
+import { Error404 } from '../pages/Error'
+import { LoginPage } from '../pages/Login'
+import { ProfilePage } from '../pages/Profile'
+import { RedirectPage } from '../pages/Redirect'
+import { YuhengShell } from '../layout'
 
 export const platformRoutes: readonly PlatformRouteRecord[] = [
-  { path: '/login', name: 'Login', component: placeholder, meta: { public: true } },
-  { path: '/error', name: 'Error', component: placeholder },
-  { path: '/redirect/:path(.*)', name: 'Redirect', component: placeholder },
-  { path: '/profile', name: 'Profile', component: placeholder },
-  { path: '/', name: 'Home', component: placeholder }
+  { path: '/login', name: 'Login', component: LoginPage, meta: { public: true, title: '登录' } },
+  { path: '/error', name: 'Error', component: Error404, meta: { title: '错误' } },
+  { path: '/redirect/:path(.*)', name: 'Redirect', component: RedirectPage, meta: { public: true, title: '跳转中' } },
+  { path: '/profile', name: 'Profile', component: ProfilePage, meta: { title: '个人中心' } },
+  { path: '/', name: 'Home', component: YuhengShell, meta: { title: '首页' } }
 ]
 
 export const fallbackRoutes: readonly PlatformRouteRecord[] = [
-  { path: '/redirect', name: 'RedirectRoot', component: placeholder },
-  { path: '/:pathMatch(.*)*', name: 'NoFound', component: placeholder }
+  { path: '/redirect', name: 'RedirectRoot', component: RedirectPage, meta: { public: true } },
+  { path: '/:pathMatch(.*)*', name: 'NoFound', component: Error404 }
 ]
