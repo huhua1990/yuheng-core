@@ -39,6 +39,7 @@ function createMemoryStore(): TokenStore {
 export function createBrowserTokenStore(storage?: TokenStorage): TokenStore & {
   getSnapshot(): TokenSnapshot
 } {
+  let memorySnapshot: TokenSnapshot = {}
   const values: TokenStore = storage
     ? {
         getAccessToken: () => storage.getItem(ACCESS_TOKEN) ?? undefined,
@@ -58,15 +59,26 @@ export function createBrowserTokenStore(storage?: TokenStorage): TokenStore & {
           storage.removeItem(VISIT_TENANT_ID)
         }
       }
-    : createMemoryStore()
+    : {
+        getAccessToken: () => memorySnapshot.accessToken,
+        getRefreshToken: () => memorySnapshot.refreshToken,
+        setToken: (snapshot) => {
+          memorySnapshot = { ...memorySnapshot, ...snapshot }
+        },
+        removeToken: () => {
+          memorySnapshot = {}
+        }
+      }
 
   return {
     ...values,
     getSnapshot: () => ({
       accessToken: values.getAccessToken(),
       refreshToken: values.getRefreshToken(),
-      tenantId: storage?.getItem(TENANT_ID) ?? undefined,
-      visitTenantId: storage?.getItem(VISIT_TENANT_ID) ?? undefined
+      tenantId: storage ? storage.getItem(TENANT_ID) ?? undefined : memorySnapshot.tenantId,
+      visitTenantId: storage
+        ? storage.getItem(VISIT_TENANT_ID) ?? undefined
+        : memorySnapshot.visitTenantId
     })
   }
 }

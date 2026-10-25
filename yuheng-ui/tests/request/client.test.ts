@@ -38,6 +38,23 @@ describe('createYuhengRequest', () => {
     expect(adapter.requests[1].config.headers.Authorization).toBeUndefined()
   })
 
+  it('keeps auth for protected paths containing the login segment', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'access' })
+    const adapter = new RecordingAdapter(async (config) =>
+      response(config, { code: 0, data: { ok: true } })
+    )
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      adapter: adapter.adapter
+    })
+
+    await request.get('/login-history')
+
+    expect(adapter.requests[0].config.headers.Authorization).toBe('Bearer access')
+  })
+
   it('adds cache headers and serializes urlencoded forms', async () => {
     const adapter = new RecordingAdapter(async (config) =>
       response(config, { code: 0, data: { ok: true } })
@@ -48,7 +65,7 @@ describe('createYuhengRequest', () => {
     await request.post(
       '/search',
       { filter: { name: 'demo' }, page: 1 },
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      { headers: { 'Content-Type': 'Application/X-WWW-Form-Urlencoded; charset=UTF-8' } }
     )
 
     expect(adapter.requests[0].config.headers['Cache-Control']).toBe('no-cache')
@@ -143,6 +160,24 @@ describe('createYuhengRequest', () => {
     expect(onUnauthorized).toHaveBeenCalledWith('refresh-failed')
   })
 
+  it('deduplicates unauthorized notification when concurrent requests have no refresh token', async () => {
+    const onUnauthorized = vi.fn()
+    const adapter = new RecordingAdapter(async (config) =>
+      response(config, { code: 401, data: null, msg: 'expired' })
+    )
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      adapter: adapter.adapter,
+      onUnauthorized
+    })
+
+    const results = await Promise.allSettled([request.get('/one'), request.get('/two')])
+
+    expect(results.every((result) => result.status === 'rejected')).toBe(true)
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+    expect(onUnauthorized).toHaveBeenCalledWith('missing-token')
+  })
+
   it('refreshes an HTTP 401 even when the envelope body reports code 0', async () => {
     const tokens = new MemoryTokenStore()
     tokens.setToken({ accessToken: 'old', refreshToken: 'refresh' })
@@ -191,6 +226,30 @@ describe('createYuhengRequest', () => {
     expect(tokens.getRefreshToken()).toBeUndefined()
     expect(onUnauthorized).toHaveBeenCalledTimes(1)
     expect(onUnauthorized).toHaveBeenCalledWith('refresh-failed')
+  })
+
+  it('does not deadlock when refreshToken uses the same request client', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'old', refreshToken: 'refresh' })
+    const onUnauthorized = vi.fn()
+    const adapter = new RecordingAdapter(async (config) => {
+      if (config.url === '/refresh-token') {
+        return response(config, { code: 401, data: null, msg: '刷新令牌已过期' })
+      }
+      return response(config, { code: 401, data: null, msg: 'expired' })
+    })
+    let request!: ReturnType<typeof createYuhengRequest>
+    request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      adapter: adapter.adapter,
+      refreshToken: () => request.post('/refresh-token'),
+      onUnauthorized
+    })
+
+    await expect(request.get('/private')).rejects.toBeInstanceOf(YuhengApiError)
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+    expect(onUnauthorized).toHaveBeenCalledWith('session-expired')
   })
 
   it('decodes JSON download errors while preserving binary downloads', async () => {

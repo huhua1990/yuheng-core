@@ -55,4 +55,22 @@ describe('token stores', () => {
     expect(store.getAccessToken()).toBeUndefined()
     expect(store.getRefreshToken()).toBeUndefined()
   })
+
+  it('retains tenant fields in the no-storage fallback snapshot', () => {
+    const store = createBrowserTokenStore()
+
+    store.setToken({
+      accessToken: 'access',
+      refreshToken: 'refresh',
+      tenantId: 'tenant',
+      visitTenantId: 'visit'
+    })
+
+    expect(store.getSnapshot()).toEqual({
+      accessToken: 'access',
+      refreshToken: 'refresh',
+      tenantId: 'tenant',
+      visitTenantId: 'visit'
+    })
+  })
 })

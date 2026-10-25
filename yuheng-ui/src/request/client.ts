@@ -37,6 +37,12 @@ function isRefreshTokenMessage(message?: string): boolean {
   return message === '无效的刷新令牌' || message === '刷新令牌已过期'
 }
 
+function isAuthFreeEndpoint(url: string): boolean {
+  const path = url.split('?')[0].replace(/\/+$/, '')
+  const endpoint = path.split('/').pop()
+  return endpoint === 'login' || endpoint === 'refresh-token'
+}
+
 async function decodeJsonBody(response: AxiosResponse): Promise<unknown> {
   if (isEnvelope(response.data)) return response.data
   const headers = response.headers as {
@@ -97,12 +103,26 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
     if (refreshPromise) return refreshPromise
     const refreshToken = tokenStore.getRefreshToken()
     if (!refreshToken) {
-      clearSession('missing-token')
-      return Promise.reject(new YuhengApiError('Missing refresh token', 401))
+      refreshPromise = Promise.reject<TokenPair>(new YuhengApiError('Missing refresh token', 401))
+        .catch((error: unknown) => {
+          clearSession('missing-token')
+          throw error
+        })
+        .finally(() => {
+          refreshPromise = undefined
+        })
+      return refreshPromise
     }
     if (!options.refreshToken) {
-      clearSession('refresh-failed')
-      return Promise.reject(new YuhengApiError('Refresh failed', 401))
+      refreshPromise = Promise.reject<TokenPair>(new YuhengApiError('Refresh failed', 401))
+        .catch((error: unknown) => {
+          clearSession('refresh-failed')
+          throw error
+        })
+        .finally(() => {
+          refreshPromise = undefined
+        })
+      return refreshPromise
     }
 
     refreshPromise = Promise.resolve()
@@ -144,6 +164,12 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
     const body = response.data
     const config = response.config as RetryConfig
     const code = response.status === 401 ? 401 : isEnvelope(body) ? body.code : response.status
+    if (code === 401 && isAuthFreeEndpoint(config.url ?? '')) {
+      if (isEnvelope(body)) {
+        throw new YuhengApiError(body.msg || 'Unauthorized', 401, body)
+      }
+      throw new YuhengApiError(response.statusText || 'Unauthorized', 401)
+    }
     if (code === 401 && !config.__yuhengRetried) {
       try {
         await refreshAccessToken()
@@ -167,7 +193,7 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
   instance.interceptors.request.use((config) => {
     const url = config.url ?? ''
     const headers = config.headers
-    if (!url.includes('/login') && !url.includes('/refresh-token')) {
+    if (!isAuthFreeEndpoint(url)) {
       const accessToken = tokenStore.getAccessToken()
       if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
     }
@@ -183,7 +209,10 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
       headers.set('Pragma', 'no-cache')
     }
     const contentType = headerValue(config, 'Content-Type') ?? headerValue(config, 'content-type')
-    if (config.method?.toLowerCase() === 'post' && contentType?.includes('application/x-www-form-urlencoded')) {
+    if (
+      config.method?.toLowerCase() === 'post' &&
+      contentType?.toLowerCase().includes('application/x-www-form-urlencoded')
+    ) {
       config.data = qs.stringify(config.data ?? {})
     }
     return config
