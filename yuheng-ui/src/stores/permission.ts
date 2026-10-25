@@ -1,10 +1,24 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import type { PlatformRouteRecord, MenuNode } from '../contracts'
 import type { YuhengUiContext } from '../runtime/options'
 import { filterMenuRoutes } from '../router/guards'
 
-export const usePermissionStore = defineStore('yuheng-permission', () => {
+export interface PermissionStoreSetup {
+  addRoutes: Ref<PlatformRouteRecord[]>
+  initialized: Ref<boolean>
+  generateRoutes(
+    context: YuhengUiContext,
+    permissionsOrMenus?: string[] | MenuNode[],
+    menuPermissions?: string[]
+  ): Promise<PlatformRouteRecord[]>
+  getAddRoutes(): PlatformRouteRecord[]
+  resetRoutes(): void
+}
+
+export const usePermissionStore = defineStore(
+  'yuheng-permission',
+  (): PermissionStoreSetup => {
   const addRoutes = ref<PlatformRouteRecord[]>([])
   const initialized = ref(false)
 
@@ -38,11 +52,12 @@ export const usePermissionStore = defineStore('yuheng-permission', () => {
     initialized.value = false
   }
 
-  return {
-    addRoutes,
-    initialized,
-    generateRoutes,
-    getAddRoutes,
-    resetRoutes
+    return {
+      addRoutes,
+      initialized,
+      generateRoutes,
+      getAddRoutes,
+      resetRoutes
+    }
   }
-})
+)

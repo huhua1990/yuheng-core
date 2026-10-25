@@ -1,8 +1,18 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
-export const useTagsViewStore = defineStore('yuheng-tags-view', () => {
+export interface TagsViewStoreSetup {
+  visitedViews: Ref<RouteLocationNormalizedLoaded[]>
+  cachedViews: Ref<string[]>
+  addView(view: RouteLocationNormalizedLoaded): void
+  delView(view: RouteLocationNormalizedLoaded): void
+  clear(): void
+}
+
+export const useTagsViewStore = defineStore(
+  'yuheng-tags-view',
+  (): TagsViewStoreSetup => {
   const visitedViews = ref<RouteLocationNormalizedLoaded[]>([])
   const cachedViews = ref<string[]>([])
   const addView = (view: RouteLocationNormalizedLoaded): void => {
@@ -17,11 +27,12 @@ export const useTagsViewStore = defineStore('yuheng-tags-view', () => {
     visitedViews.value = []
     cachedViews.value = []
   }
-  return {
-    visitedViews,
-    cachedViews,
-    addView,
-    delView,
-    clear
+    return {
+      visitedViews,
+      cachedViews,
+      addView,
+      delView,
+      clear
+    }
   }
-})
+)
