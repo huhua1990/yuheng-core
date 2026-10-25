@@ -12,28 +12,31 @@ describe('installYuhengUi', () => {
     const originalDocument = globalThis.document
     const querySelector = vi.fn()
     Object.defineProperty(globalThis, 'document', { configurable: true, value: { querySelector } })
-    const app = createApp(defineComponent({ template: '<div />' }))
-    const mount = vi.spyOn(app, 'mount')
-    const runtime = installYuhengUi(app, { apiBaseUrl: '/api' })
+    try {
+      const app = createApp(defineComponent({ template: '<div />' }))
+      const mount = vi.spyOn(app, 'mount')
+      const runtime = installYuhengUi(app, { apiBaseUrl: '/api' })
 
-    expect(runtime.context.request).toBeDefined()
-    expect(runtime.context.tokenStore).toBeDefined()
-    expect(runtime.context.tenantStore).toBeDefined()
-    expect(runtime.context.pinia).toBeDefined()
-    const appContext = (app as unknown as { _context: { directives: Record<string, unknown>; components: Record<string, unknown> } })._context
-    expect(appContext.directives.focus).toBeDefined()
-    expect(appContext.components.ConfigGlobal).toBeDefined()
-    expect(appContext.components.Dialog).toBeDefined()
-    expect(querySelector).not.toHaveBeenCalledWith('#app')
-    expect(mount).not.toHaveBeenCalled()
+      expect(runtime.context.request).toBeDefined()
+      expect(runtime.context.tokenStore).toBeDefined()
+      expect(runtime.context.tenantStore).toBeDefined()
+      expect(runtime.context.pinia).toBeDefined()
+      const appContext = (app as unknown as { _context: { directives: Record<string, unknown>; components: Record<string, unknown> } })._context
+      expect(appContext.directives.focus).toBeDefined()
+      expect(appContext.components.ConfigGlobal).toBeDefined()
+      expect(appContext.components.Dialog).toBeDefined()
+      expect(querySelector).not.toHaveBeenCalledWith('#app')
+      expect(mount).not.toHaveBeenCalled()
 
-    const router = createRouter({ history: createMemoryHistory(), routes: [] })
-    runtime.registerRoutes(router)
-    expect(router.hasRoute('Login')).toBe(true)
+      const router = createRouter({ history: createMemoryHistory(), routes: [] })
+      runtime.registerRoutes(router)
+      expect(router.hasRoute('Login')).toBe(true)
 
-    runtime.dispose()
-    expect(runtime.disposed).toBe(true)
-    Object.defineProperty(globalThis, 'document', { configurable: true, value: originalDocument })
+      runtime.dispose()
+      expect(runtime.disposed).toBe(true)
+    } finally {
+      Object.defineProperty(globalThis, 'document', { configurable: true, value: originalDocument })
+    }
   })
 
   it('does not share stores between two runtime instances', () => {
