@@ -19,12 +19,13 @@ export function createYuhengUiContext(
   options: YuhengUiOptions,
   overrides: Partial<Pick<YuhengUiContext, 'request' | 'tokenStore' | 'tenantStore' | 'pinia'>> = {}
 ): YuhengUiContext {
-  const tokenStore = overrides.tokenStore ?? createDefaultTokenStore()
-  const tenantStore = overrides.tenantStore ?? createDefaultTenantStore()
+  const tokenStore = overrides.tokenStore ?? options.tokenStore ?? createDefaultTokenStore()
+  const tenantStore = overrides.tenantStore ?? options.tenantStore ?? createDefaultTenantStore()
   return {
     options,
     request:
       overrides.request ??
+      options.request ??
       createYuhengRequest({
         apiBaseUrl: options.apiBaseUrl ?? '',
         requestTimeout: options.requestTimeout,
@@ -36,7 +37,7 @@ export function createYuhengUiContext(
       }),
     tokenStore,
     tenantStore,
-    pinia: overrides.pinia ?? createPinia(),
+    pinia: overrides.pinia ?? options.pinia ?? createPinia(),
     initialized: false
   }
 }

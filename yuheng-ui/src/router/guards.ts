@@ -47,7 +47,12 @@ export async function resolveNavigation(
 
 function hasPermission(permission: string | undefined, permissions: readonly string[]): boolean {
   if (!permission) return true
-  return permissions.includes(permission) || permissions.includes('*:*:*') || permissions.includes('*')
+  return (
+    permissions.includes(permission) ||
+    permissions.includes('*:*:*') ||
+    permissions.includes('*') ||
+    permissions.some((grant) => grant.endsWith(':*') && permission.startsWith(grant.slice(0, -1)))
+  )
 }
 
 export function filterMenuRoutes(

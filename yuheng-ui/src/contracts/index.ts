@@ -1,5 +1,6 @@
 import type { AxiosAdapter, AxiosRequestConfig, AxiosResponse } from 'axios'
 import type { App } from 'vue'
+import type { Pinia } from 'pinia'
 import type { RouteRecordRaw, Router } from 'vue-router'
 import type { TenantStore } from '../auth/tenant'
 import type { TokenPair, TokenStore } from '../auth/token'
@@ -20,6 +21,10 @@ export interface YuhengUiOptions {
   platformRoutes?: PlatformRouteRecord[]
   onUnauthorized?: (reason: UnauthorizedReason) => void
   onApiError?: (error: YuhengApiError) => void
+  request?: YuhengRequest
+  tokenStore?: TokenStore
+  tenantStore?: TenantStore
+  pinia?: Pinia
 }
 
 export type PlatformRouteRecord = RouteRecordRaw & {
