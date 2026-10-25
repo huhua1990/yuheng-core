@@ -95,7 +95,7 @@ export function registerRoutes(
 export function resetDynamicRoutes(
   router: { getRoutes: () => Array<{ name?: string | symbol }>; removeRoute: (name: string | symbol) => void }
 ): void {
-  const keep = new Set(['Redirect', 'RedirectRoot', 'Login', 'NoFound', 'Home'])
+  const keep = new Set(['Redirect', 'RedirectRoot', 'Login', 'Error', 'NoFound', 'Home'])
   for (const route of router.getRoutes()) {
     if (route.name !== undefined && !keep.has(String(route.name))) router.removeRoute(route.name)
   }
