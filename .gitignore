@@ -14,3 +14,7 @@ logs/
 
 # Local isolated worktrees
 .worktrees/
+
+# UI package artifacts
+yuheng-ui/node_modules/
+yuheng-ui/dist/
