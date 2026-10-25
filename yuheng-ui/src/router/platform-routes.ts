@@ -4,6 +4,7 @@ import { LoginPage } from '../pages/Login'
 import { ProfilePage } from '../pages/Profile'
 import { RedirectPage } from '../pages/Redirect'
 import { YuhengShell } from '../layout'
+import { infraRoutes } from '../modules/infra/routes'
 import { systemRoutes } from '../modules/system/routes'
 
 export const platformRoutes: readonly PlatformRouteRecord[] = [
@@ -12,7 +13,8 @@ export const platformRoutes: readonly PlatformRouteRecord[] = [
   { path: '/redirect/:path(.*)', name: 'Redirect', component: RedirectPage, meta: { public: true, title: '跳转中' } },
   { path: '/profile', name: 'Profile', component: ProfilePage, meta: { title: '个人中心' } },
   { path: '/', name: 'Home', component: YuhengShell, meta: { title: '首页' } },
-  ...systemRoutes
+  ...systemRoutes,
+  ...infraRoutes
 ]
 
 export const fallbackRoutes: readonly PlatformRouteRecord[] = [

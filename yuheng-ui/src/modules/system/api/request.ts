@@ -1,8 +1,10 @@
-import type { AxiosRequestConfig } from 'axios'
 import type { YuhengRequest } from '../../../contracts'
 
-export interface SystemRequestConfig extends AxiosRequestConfig {
+export interface SystemRequestConfig {
   url: string
+  data?: unknown
+  params?: unknown
+  [key: string]: unknown
 }
 
 export interface SystemRequest {
@@ -26,12 +28,12 @@ function getRequest(): YuhengRequest {
 }
 
 export const systemRequest: SystemRequest = {
-  get: ({ url, ...config }) => getRequest().get(url, config),
-  post: ({ url, data, ...config }) => getRequest().post(url, data, config),
-  put: ({ url, data, ...config }) => getRequest().put(url, data, config),
-  delete: ({ url, ...config }) => getRequest().delete(url, config),
-  upload: ({ url, data, ...config }) => getRequest().upload(url, data, config),
-  download: ({ url, ...config }) => getRequest().download(url, config)
+  get: ({ url, ...config }) => getRequest().get(url, config as never),
+  post: ({ url, data, ...config }) => getRequest().post(url, data, config as never),
+  put: ({ url, data, ...config }) => getRequest().put(url, data, config as never),
+  delete: ({ url, ...config }) => getRequest().delete(url, config as never),
+  upload: ({ url, data, ...config }) => getRequest().upload(url, data, config as never),
+  download: ({ url, ...config }) => getRequest().download(url, config as never)
 }
 
 declare global {
