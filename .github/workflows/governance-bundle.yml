@@ -1,0 +1,45 @@
+name: yuheng governance bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'governance/**'
+      - 'ai-knowledge-core/**'
+      - 'release/**'
+      - 'tools/governance/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'governance/**'
+      - 'ai-knowledge-core/**'
+      - 'release/**'
+      - 'tools/governance/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify manifest and bundle
+        run: |
+          python3 tools/governance/verify_manifest.py release/yuheng-manifest.yaml --json
+          python3 tools/governance/verify_bundle.py . --json
+
+      - name: Package governance assets
+        run: |
+          tar -czf "yuheng-governance-${GITHUB_SHA}.tgz" \
+            governance ai-knowledge-core release/yuheng-manifest.yaml \
+            release/compatibility-matrix.yaml
+
+      - name: Upload governance bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuheng-governance-${{ github.sha }}
+          path: yuheng-governance-${{ github.sha }}.tgz

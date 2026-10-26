@@ -1,0 +1,65 @@
+name: yuheng-core verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: yuheng-ui/pnpm-lock.yaml
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Verify governance manifest
+        run: |
+          python3 tools/governance/verify_manifest.py release/yuheng-manifest.yaml --json
+          python3 tools/governance/verify_bundle.py . --json
+
+      - name: Build Java core
+        run: mvn -B -DskipTests package
+
+      - name: Install UI dependencies
+        working-directory: yuheng-ui
+        run: pnpm install --frozen-lockfile
+
+      - name: Test UI package
+        working-directory: yuheng-ui
+        run: pnpm test
+
+      - name: Typecheck UI package
+        working-directory: yuheng-ui
+        run: pnpm run typecheck
+
+      - name: Build UI package
+        working-directory: yuheng-ui
+        run: pnpm run build
+
+      - name: Check UI boundary
+        working-directory: yuheng-ui
+        run: pnpm run lint:boundary
