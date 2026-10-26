@@ -1,0 +1,12 @@
+.yuheng-ui-shell {
+  color: var(--yuheng-ui-text-color);
+  background: var(--yuheng-ui-bg);
+}
+.yuheng-ui-shell__sidebar {
+  background: #fff;
+  border-right: 1px solid var(--yuheng-ui-border-color);
+}
+.yuheng-ui-shell__header {
+  background: #fff;
+  border-bottom: 1px solid var(--yuheng-ui-border-color);
+}
