@@ -3,6 +3,7 @@ import { ref, type Ref } from 'vue'
 import type { PlatformRouteRecord, MenuNode } from '../contracts'
 import type { YuhengUiContext } from '../runtime/options'
 import { filterMenuRoutes } from '../router/guards'
+import { resolveMenuComponent } from '../router/platform-routes'
 
 export interface PermissionStoreSetup {
   addRoutes: Ref<PlatformRouteRecord[]>
@@ -36,13 +37,13 @@ export const usePermissionStore = defineStore(
           : undefined
       const permissions = directMenus ? menuPermissions : (permissionsOrMenus as string[])
       if (directMenus) {
-        addRoutes.value = filterMenuRoutes(directMenus, permissions)
+        addRoutes.value = filterMenuRoutes(directMenus, permissions, (key) => context.options.resolveComponent?.(key) ?? resolveMenuComponent(key))
       } else {
         const response = await context.request.get<{ menus?: MenuNode[] } | MenuNode[]>(
           '/system/auth/get-permission-info'
         )
         const fetchedMenus = Array.isArray(response) ? response : response.menus ?? []
-        addRoutes.value = filterMenuRoutes(fetchedMenus, permissions)
+        addRoutes.value = filterMenuRoutes(fetchedMenus, permissions, (key) => context.options.resolveComponent?.(key) ?? resolveMenuComponent(key))
       }
       initialized.value = true
       return addRoutes.value

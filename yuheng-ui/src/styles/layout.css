@@ -1,0 +1,22 @@
+.yuheng-ui-shell { display: flex; width: 100%; min-height: 100vh; color: var(--el-text-color-primary); background: var(--yuheng-ui-bg); }
+.yuheng-ui-shell__sidebar { flex: 0 0 auto; overflow: auto; border-right: 1px solid var(--yuheng-ui-border-color); background: #fff; transition: width 0.2s; }
+.yuheng-ui-shell__brand { display: flex; min-height: var(--yuheng-ui-header-height); align-items: center; padding: 0 20px; font-size: 18px; font-weight: 600; white-space: nowrap; }
+.yuheng-ui-shell__navigation { display: grid; gap: 4px; padding: 8px; }
+.yuheng-ui-shell__nav-link { display: flex; min-height: 40px; align-items: center; overflow: hidden; padding: 0 12px; border-radius: 4px; color: var(--el-text-color-regular, #606266); text-decoration: none; white-space: nowrap; }
+.yuheng-ui-shell__nav-link:hover, .yuheng-ui-shell__nav-link.router-link-active { color: var(--yuheng-ui-color-primary); background: #ecf5ff; }
+.yuheng-ui-shell__main { display: flex; min-width: 0; flex: 1; flex-direction: column; }
+.yuheng-ui-shell__header { display: flex; min-height: var(--yuheng-ui-header-height); align-items: center; gap: 16px; padding: 0 20px; border-bottom: 1px solid var(--yuheng-ui-border-color); background: #fff; }
+.yuheng-ui-shell__header button { cursor: pointer; }
+.yuheng-ui-shell__user { margin-left: auto; }
+.yuheng-ui-shell__content { min-width: 0; flex: 1; padding: 20px; }
+
+@media (max-width: 720px) {
+  .yuheng-ui-shell__sidebar { max-width: 44vw; }
+  .yuheng-ui-shell__content { padding: 12px; }
+}
+
+.yuheng-ui-shell__brand img, .yuheng-ui-shell__logo { width: calc(var(--yuheng-ui-header-height) - 18px); height: calc(var(--yuheng-ui-header-height) - 18px); }
+.yuheng-ui-shell__brand { text-decoration:none; color:inherit; gap:10px; }
+.yuheng-ui-shell__header-left { display:flex; align-items:center; gap:16px; }
+.yuheng-ui-shell__collapse { cursor:pointer; }
+.yuheng-ui-shell__user-trigger { display:flex; align-items:center; gap:8px; cursor:pointer; }

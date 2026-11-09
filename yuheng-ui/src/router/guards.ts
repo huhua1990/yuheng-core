@@ -1,3 +1,5 @@
+import { h } from 'vue'
+import { RouterView, type Router } from 'vue-router'
 import type { MenuNode, PlatformRouteRecord } from '../contracts'
 import type { YuhengUiContext } from '../runtime/options'
 
@@ -63,39 +65,56 @@ function hasPermission(permission: string | undefined, permissions: readonly str
 
 export function filterMenuRoutes(
   nodes: readonly MenuNode[],
-  permissions: readonly string[]
+  permissions: readonly string[],
+  resolveComponent?: (componentKey: string) => PlatformRouteRecord['component'] | undefined
 ): PlatformRouteRecord[] {
   return nodes.flatMap((node) => {
-    const children = node.children ? filterMenuRoutes(node.children, permissions) : []
+    const children = node.children ? filterMenuRoutes(node.children, permissions, resolveComponent) : []
     if (!hasPermission(node.permission, permissions) && children.length === 0) return []
     const route: PlatformRouteRecord = {
-      name: node.name,
-      path: node.path ?? `/${String(node.name).replace(/\s+/g, '-').toLowerCase()}`,
-      component:
-        node.component && typeof node.component !== 'string'
-          ? (node.component as never)
-          : { render: () => null },
-      meta: node.permission ? { permission: node.permission } : undefined,
+      name: node.componentName || `${node.name}-${node.id}`,
+      path: node.path || `menu-${node.id}`,
+      component: node.component
+        ? (resolveComponent?.(node.component.split('?')[0]) ?? {
+            render: () => h('div', { role: 'alert', class: 'yuheng-ui-page' }, `页面组件未注册：${node.component}`)
+          })
+        : { render: () => h(RouterView) },
+      meta: {
+        title: node.name,
+        icon: node.icon,
+        hidden: node.visible === false,
+        noCache: node.keepAlive === false,
+        dynamic: true,
+        ...(node.permission ? { permission: node.permission } : {})
+      },
       ...(children.length ? { children } : {})
+    }
+    if (children.length && !node.component) {
+      const first = children.find((child) => !child.meta?.hidden) ?? children[0]
+      route.redirect = { name: first.name }
     }
     return [route]
   })
 }
 
 export function registerRoutes(
-  router: { addRoute: (route: PlatformRouteRecord) => unknown; hasRoute: (name: string) => boolean },
-  routes: readonly PlatformRouteRecord[]
+  router: Router,
+  routes: readonly PlatformRouteRecord[],
+  parentName?: string
 ): void {
   for (const route of routes) {
-    if (route.name !== undefined && router.hasRoute(String(route.name))) continue
-    router.addRoute(route)
+    if (route.name !== undefined && router.hasRoute(route.name)) continue
+    if (parentName && router.hasRoute(parentName)) router.addRoute(parentName, route)
+    else router.addRoute(route)
   }
 }
 
 export function resetDynamicRoutes(
   router: { getRoutes: () => Array<{ name?: string | symbol }>; removeRoute: (name: string | symbol) => void }
 ): void {
-  const keep = new Set(['Redirect', 'RedirectRoot', 'Login', 'Error', 'Profile', 'NoFound', 'Home'])
+  const keep = new Set([
+    'Redirect', 'RedirectRoot', 'Login', 'Error', 'Profile', 'NoFound', 'Home', 'HomeDashboard'
+  ])
   for (const route of router.getRoutes()) {
     if (route.name !== undefined && !keep.has(String(route.name))) router.removeRoute(route.name)
   }

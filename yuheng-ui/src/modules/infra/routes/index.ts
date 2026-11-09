@@ -1,6 +1,9 @@
-import { h, type Component } from 'vue'
+import { defineComponent, h, type Component } from 'vue'
 import type { PlatformRouteRecord } from '../../../contracts'
 import InfraModulePage from '../views/InfraModulePage.vue'
+import ConfigManagementPage from '../views/ConfigManagementPage.vue'
+import SystemDataListPage from '../../system/views/SystemDataListPage.vue'
+import type { SystemListApiKey } from '../../system/views/SystemDataListPage.vue'
 
 function page(title: string): Component {
   return {
@@ -32,6 +35,24 @@ export const infraRoutes: PlatformRouteRecord[] = [
     .split('/')
     .map((part) => part.replace(/(^|-)([a-z])/g, (_, _separator, char) => char.toUpperCase()))
     .join('')}`,
-  component: page(title),
+  component: (() => {
+    const apiKeys: Record<string, string> = {
+      'api-access-log': 'infra:api-access-log',
+      'api-error-log': 'infra:api-error-log',
+      codegen: 'infra:codegen',
+      'file-config': 'infra:file-config',
+      file: 'infra:file',
+      job: 'infra:job',
+      'job/log': 'infra:job-log'
+    }
+    if (segment === 'config') return ConfigManagementPage
+    const apiKey = apiKeys[segment]
+    return apiKey
+      ? defineComponent({
+          name: `${String(permission).replace(/[^a-zA-Z0-9]/g, '')}Page`,
+          setup: () => () => h(SystemDataListPage, { apiKey: apiKey as SystemListApiKey, title })
+        })
+      : page(title)
+  })(),
   meta: { title, permission }
 }))

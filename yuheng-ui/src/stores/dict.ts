@@ -11,7 +11,13 @@ export const useDictStore = defineStore('yuheng-dict', () => {
   const getDict = <T = unknown>(type: string): T | undefined => dictMap.value[type] as T | undefined
   const fetchDict = async (context: YuhengUiContext): Promise<unknown> => {
     const result = await context.request.get('/system/dict-data/simple-list')
-    setDictMap(result as Record<string, unknown>)
+    if (Array.isArray(result)) {
+      const groups: Record<string, unknown[]> = {}
+      for (const entry of result as Array<{ dictType: string }>) {
+        ;(groups[entry.dictType] ??= []).push(entry)
+      }
+      setDictMap(groups)
+    } else setDictMap(result as Record<string, unknown>)
     return result
   }
   return {

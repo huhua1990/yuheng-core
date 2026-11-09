@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { filterMenuRoutes, resolveNavigation } from '../../src/router/guards'
+import { filterMenuRoutes, registerRoutes, resolveNavigation } from '../../src/router/guards'
 import { createYuhengRouter } from '../../src/router'
 import { platformRoutes } from '../../src/router/platform-routes'
 
@@ -104,6 +104,18 @@ describe('platform route guards', () => {
     expect(router.hasRoute('Home')).toBe(true)
   })
 
+  it('registers permission routes as children of the shell', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [...platformRoutes] })
+    const dynamic = { name: 'DynamicUser', path: '/system/dynamic-user', component: { render: () => null } }
+
+    registerRoutes(router, [dynamic], 'Home')
+
+    expect(router.resolve('/system/dynamic-user').matched.map((route) => route.name)).toEqual([
+      'Home',
+      'DynamicUser'
+    ])
+  })
+
   it('disposes the router runtime and blocks later route mutations', () => {
     const router = createRouter({ history: createMemoryHistory(), routes: [] })
     const runtime = createYuhengRouter({ router })
@@ -113,5 +125,45 @@ describe('platform route guards', () => {
       { name: 'AfterDispose', path: '/after-dispose', component: { render: () => null } }
     ])
     expect(router.hasRoute('AfterDispose')).toBe(false)
+  })
+})
+
+describe('duplicate menu names', () => {
+  it('registers parent and child menus that share the same display name', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [...platformRoutes] })
+    const routes = filterMenuRoutes(
+      [
+        {
+          id: 1,
+          name: '日程管理',
+          path: '/schedule',
+          children: [{ id: 2, name: '日程管理', path: '/schedule/list', permission: 'oa:schedule:query' }]
+        }
+      ],
+      ['oa:schedule:query']
+    )
+
+    expect(() => registerRoutes(router, routes, 'Home')).not.toThrow()
+    expect(router.hasRoute('日程管理-1')).toBe(true)
+    expect(router.hasRoute('日程管理-2')).toBe(true)
+    for (let index = 0; index < 3; index += 1) registerRoutes(router, routes, 'Home')
+    expect(router.getRoutes().filter((route) => String(route.name).startsWith('日程管理'))).toHaveLength(2)
+    expect(router.resolve('/schedule/list').matched.map((route) => String(route.name))).toEqual([
+      'Home',
+      '日程管理-1',
+      '日程管理-2'
+    ])
+  })
+
+  it('does not duplicate routes when dynamic menus are registered repeatedly', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [...platformRoutes] })
+    const routes = filterMenuRoutes(
+      [{ id: 9, name: '重复菜单', path: '/repeat', permission: 'repeat:list' }],
+      ['repeat:list']
+    )
+
+    for (let index = 0; index < 3; index += 1) registerRoutes(router, routes, 'Home')
+
+    expect(router.getRoutes().filter((route) => String(route.name).startsWith('重复菜单'))).toHaveLength(1)
   })
 })
