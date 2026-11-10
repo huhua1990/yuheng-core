@@ -25,17 +25,95 @@ def _frontmatter(path: Path) -> Dict[str, str]:
     if not lines or lines[0].strip() != "---":
         return {}
     values: Dict[str, str] = {}
-    for line in lines[1:]:
+    closed = False
+    invalid = False
+    index = 1
+    while index < len(lines):
+        line = lines[index]
         if line.strip() == "---":
+            closed = True
             break
-        if ":" in line:
-            key, value = line.split(":", 1)
-            values[key.strip()] = value.strip().strip("'\"")
-    return values
+        if not line or line.lstrip().startswith("#"):
+            index += 1
+            continue
+        if line[0].isspace():
+            index += 1
+            continue
+        if ":" not in line:
+            invalid = True
+            break
+        key, raw = line.split(":", 1)
+        key, raw = key.strip(), raw.strip()
+        if not key or key in values:
+            invalid = True
+            break
+        if raw in ("|", ">", "|-", ">-"):
+            block = []
+            index += 1
+            while index < len(lines) and (not lines[index] or lines[index][0].isspace()):
+                block.append(lines[index].strip())
+                index += 1
+            parsed = "\n".join(block).strip()
+        else:
+            parsed = _parse_yaml_scalar(raw)
+        if isinstance(parsed, (dict, list)):
+            parsed = None
+        values[key] = parsed
+        if raw.startswith(("[", "{")) and not isinstance(_parse_yaml_scalar(raw), (dict, list)):
+            invalid = True
+            break
+        if key not in ("name", "description") and raw.startswith(("[", "{")):
+            invalid = True
+            break
+        index += 1
+    return values if closed and not invalid else {}
 
 
 def _asset_id(path: Path, metadata: Mapping[str, str]) -> str:
-    return metadata.get("id") or path.stem
+    if path.name == "SKILL.md":
+        return metadata.get("name") or path.parent.name
+    return metadata.get("id") or metadata.get("name") or path.stem
+
+
+def _parse_yaml_scalar(value: str) -> Any:
+    value = value.strip()
+    if not value:
+        return ""
+    if value in ("null", "~"):
+        return None
+    if value.lower() in ("true", "false"):
+        return value.lower() == "true"
+    if value[0] in "[{":
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return None
+    if value[0] in "'\"":
+        return value[1:-1] if len(value) >= 2 and value[-1] == value[0] else None
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        return value
+
+
+def _check_skill(path: Path, metadata: Mapping[str, str], root: Path,
+                 issues: List[Dict[str, Any]]) -> None:
+    name = metadata.get("name", "")
+    description = metadata.get("description", "")
+    if (
+        not isinstance(name, str)
+        or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name)
+        or len(name) > 64
+        or name != path.parent.name
+        or not isinstance(description, str)
+        or not description.strip()
+        or len(description) > 1024
+    ):
+        issues.append(_issue(
+            "bundle.skill.metadata",
+            "skill requires a directory-matching name and a nonempty description",
+            str(path.relative_to(root)),
+        ))
 
 
 def _check_links(path: Path, root: Path, issues: List[Dict[str, Any]]) -> None:
@@ -129,7 +207,26 @@ def validate_bundle(root: Path, manifest: Optional[Mapping[str, Any]] = None) ->
     )
     skill_root = root / "governance" / "skills"
     if skill_root.exists():
-        asset_paths.extend(sorted(skill_root.rglob("SKILL.md")))
+        skills = sorted(skill_root.rglob("SKILL.md"))
+        asset_paths.extend(skills)
+        for skill in skills:
+            if skill.parent.parent != skill_root:
+                issues.append(_issue(
+                    "bundle.skill.layout",
+                    "active skills must use governance/skills/<name>/SKILL.md layout",
+                    str(skill.relative_to(root)),
+                ))
+        for child in skill_root.iterdir():
+            if child.is_dir() and not any(child.rglob("SKILL.md")):
+                issues.append(_issue(
+                    "bundle.skill.directory",
+                    "active skill directory is missing SKILL.md",
+                    str(child.relative_to(root)),
+                ))
+    else:
+        issues.append(_issue("bundle.skill.directory", "missing governance/skills directory", "governance/skills"))
+    if skill_root.exists() and not any(skill_root.glob("*/SKILL.md")):
+        issues.append(_issue("bundle.skill.directory", "no directly discoverable skills found", "governance/skills"))
     if not asset_paths:
         issues.append(
             _issue(
@@ -143,6 +240,8 @@ def validate_bundle(root: Path, manifest: Optional[Mapping[str, Any]] = None) ->
     versions: Dict[str, str] = {}
     for asset_path in asset_paths:
         metadata = _frontmatter(asset_path)
+        if asset_path.name == "SKILL.md":
+            _check_skill(asset_path, metadata, root, issues)
         asset_id = _asset_id(asset_path, metadata)
         if asset_id in seen_ids:
             issues.append(
@@ -160,6 +259,13 @@ def validate_bundle(root: Path, manifest: Optional[Mapping[str, Any]] = None) ->
         if metadata.get("version"):
             versions[asset_id] = metadata["version"]
         _check_links(asset_path, root, issues)
+
+    # Resources are part of the published bundle, including nested references
+    # and templates. Validate their links as well as the skill entrypoints.
+    if skill_root.exists():
+        for resource in sorted(skill_root.rglob("*.md")):
+            if resource.name != "SKILL.md":
+                _check_links(resource, root, issues)
 
     required_tracks = manifest_value.get("knowledgeTracks", [])
     if not isinstance(required_tracks, list):

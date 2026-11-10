@@ -5,8 +5,8 @@ project:
 codeVersion: 0.1.0-SNAPSHOT
 artifacts:
   server: com.yuheng:yuheng-server:0.1.0-SNAPSHOT
-  ui: yuheng-ui@0.1.0-SNAPSHOT
-governanceVersion: 0.1.0
+  ui: '@yuheng/platform-ui@0.1.0-SNAPSHOT'
+governanceVersion: 0.2.0
 knowledgeVersion: 0.1.0
 overlayVersion: core-2026.10.25
 compatibility:
