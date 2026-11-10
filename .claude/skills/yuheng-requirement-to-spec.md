@@ -20,9 +20,20 @@ description: Convert user requirements to formal specification
 
 ## 执行流程
 
-### 1. 需求收集
+### 1. 调用 Brainstorming 进行需求探索
 
-询问用户以下关键问题：
+**核心步骤**:
+调用 `yuheng-brainstorming` 完成：
+- 需求澄清
+- 方案对比
+- 设计验证
+- 设计文档编写
+
+**输出**: 已批准的设计文档
+
+### 2. 需求收集（由 Brainstorming 完成）
+
+Brainstorming 会逐个询问：
 
 - 这个功能的目标用户是谁？
 - 要解决什么业务问题？
@@ -30,7 +41,7 @@ description: Convert user requirements to formal specification
 - 有哪些约束条件？
 - 如何验证功能是否完成？
 
-### 2. 需求分析
+### 3. 需求分析（由 Brainstorming 完成）
 
 基于收集到的信息，分析：
 
@@ -39,7 +50,7 @@ description: Convert user requirements to formal specification
 - 接口设计（需要哪些 API）
 - 前端页面（需要哪些页面和组件）
 
-### 3. 生成规格
+### 4. 生成规格（由 Brainstorming 完成）
 
 生成包含以下章节的规格文档：
 
@@ -74,24 +85,70 @@ description: Convert user requirements to formal specification
 - 性能验收
 ```
 
-### 4. 用户确认
+### 5. 规格验证与冻结
 
-提交规格文档给用户审核，收集反馈并修改。
+**用户审查**:
+- 提交规格文档给用户
+- 收集反馈
+- 必要时修改
 
-### 5. 冻结规格
+**冻结规格**:
+- 用户确认后，标记为 `FROZEN`
+- 可以进入下一阶段
 
-用户确认后，将规格状态标记为 `FROZEN`，可以进入下一阶段。
+## 标准链路
+
+```
+用户原始需求
+    ↓
+yuheng-brainstorming
+    ├─ 探索项目上下文
+    ├─ 澄清问题（一次一个）
+    ├─ 提出 2-3 种方案
+    ├─ 展示设计并获批
+    ├─ 编写设计文档
+    └─ 设计自我审查
+    ↓
+(本 Skill 整合 brainstorming 输出)
+    ↓
+正式需求规格说明书（FROZEN）
+    ↓
+yuheng-spec-to-plan
+```
+
+## 与 Brainstorming 的关系
+
+**调用关系**:
+- 本 Skill 内部调用 `yuheng-brainstorming`
+- Brainstorming 负责需求探索和设计验证
+- 本 Skill 负责整合输出为正式规格
+
+**职责划分**:
+| 职责 | Brainstorming | Requirement-to-Spec |
+|------|---------------|---------------------|
+| 需求澄清 | ✅ | - |
+| 方案对比 | ✅ | - |
+| 设计验证 | ✅ | - |
+| 设计文档 | ✅ | - |
+| 规格整合 | - | ✅ |
+| 规格冻结 | - | ✅ |
 
 ## 使用方法
 
 ```
 用户："我需要实现用户管理功能"
-AI：进入需求收集流程...
+AI：调用 yuheng-brainstorming 进行需求探索...
 ```
 
 ## 相关规则
 
 - `@rules/yuheng-phase-gate.md` - 规格必须冻结才能进入实现
+- `@rules/yuheng-design-gate.md` - 设计门禁规则
+
+## 相关 Skills
+
+- `@skills/yuheng-brainstorming.md` - 需求探索与设计
+- `@skills/yuheng-spec-to-plan.md` - 规格转开发计划
 
 ## 下一步
 

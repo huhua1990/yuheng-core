@@ -28,23 +28,30 @@ description: Complete workflow from requirement to delivery
 
 ```mermaid
 graph LR
-    A[原始需求] --> B[需求规格]
-    B --> C[用户确认]
-    C --> D[开发计划]
-    D --> E[用户确认]
-    E --> F[交付执行]
-    F --> G[完成]
+    A[原始需求] --> B[Brainstorming]
+    B --> C[需求规格]
+    C --> D[用户确认]
+    D --> E[开发计划]
+    E --> F[用户确认]
+    F --> G[交付执行]
+    G --> H[完成]
 ```
 
-### 阶段 1: 需求规格
+### 阶段 1: 需求探索与规格化
 
-调用 `yuheng-requirement-to-spec`：
+调用 `yuheng-requirement-to-spec`（内部使用 `yuheng-brainstorming`）：
 
-1. 收集需求信息
-2. 分析功能范围
-3. 设计数据模型
-4. 生成规格文档
-5. 用户确认并冻结
+1. **Brainstorming 阶段**:
+   - 探索项目上下文
+   - 逐个澄清问题
+   - 提出 2-3 种方案
+   - 展示设计并获批
+   - 编写设计文档
+   
+2. **规格整合**:
+   - 整合 brainstorming 输出
+   - 生成正式规格文档
+   - 用户确认并冻结
 
 **门禁**: 规格必须 `FROZEN` 才能进入下一阶段
 
