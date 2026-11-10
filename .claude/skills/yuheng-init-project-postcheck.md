@@ -114,7 +114,7 @@ curl http://localhost:8080/actuator/health
 ## 基本信息
 - 项目名称：xxx
 - Yuheng 版本：0.1.0-SNAPSHOT
-- 检查时间：2024-11-09
+- 检查时间：2026-11-09
 
 ## 检查结果
 - ✅ 通过项：20
