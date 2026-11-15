@@ -21,7 +21,7 @@ metadata:
 ## 实现约束
 
 - 在当前工程既有页面结构中改动，优先复用组件、布局和状态；消费端业务不进入 core，不强套旧目录或其他框架组件。
-- 核对 `@yuheng/platform-ui` 的 `package.json` 导出、类型与源码；实际入口包括 `installYuhengUi` 和 `createYuhengRequest`。
+- 核对 `yuheng-ui` 的 `package.json` 导出、类型与源码；实际入口包括 `installYuhengUi` 和 `createYuhengRequest`。
 - 复用已有 runtime 的 `runtime.context.request`，实例创建留在应用装配处；不从包导入静态 `request`，不另建页面级 axios。
 - 共享状态使用真实的 `useUserStore`、`usePermissionStore`、`useDictStore` 及已核实成员，不引用未导出的 `useMenuStore`。
 - 核对实际请求实例、API 包装层和类型；普通请求解包 `{code,data}` 后返回业务数据，不再机械读取 `.data`。

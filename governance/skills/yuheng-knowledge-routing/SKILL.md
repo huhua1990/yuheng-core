@@ -30,7 +30,7 @@ metadata:
 | 版本或兼容差异 | manifest、`ai-knowledge-core/metadata.json`、`ai-knowledge-core/release-matrix/` 与实际依赖 |
 
 只读取当前任务涉及的索引和源码；必要文件不存在时注明缺失，不把逻辑路径当作相对技能路径。
-当前前端包为 `@yuheng/platform-ui`，导出 `createYuhengRequest`、`installYuhengUi`、`useUserStore`、`usePermissionStore`、`useDictStore`。
+当前前端包为 `yuheng-ui`，导出 `createYuhengRequest`、`installYuhengUi`、`useUserStore`、`usePermissionStore`、`useDictStore`。
 它不导出静态 `request` 或 `useMenuStore`；已有实例复用 `runtime.context.request`，方法签名和解包行为须读实际源码。
 HTTP 方法以 Controller 和客户端契约为准，含 GET/POST/PUT/DELETE；Service 接口与 Impl 也不能推定一律继承 `ServiceImpl`。
 业务定制留在消费端；core 仅承载已确认的框架共性能力，不能因复用困难把业务逻辑移入 core。

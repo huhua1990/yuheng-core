@@ -17,7 +17,7 @@ metadata:
 1. 确认当前根、Git 仓库、已有修改、core/消费端身份及后端、前端实际目录，不根据模板名假设结构。
 2. core 读取 `release/yuheng-manifest.yaml`，消费端读取 `yuheng-manifest.yaml`，核对字段、兼容约束及知识元数据。
 3. 对照实际 `pom.xml`、`package.json`、已有锁文件和可读依赖元数据核实包名/版本；缺文件或安装状态未知就记录未知。
-4. 核对前端实际包 `@yuheng/platform-ui` 与 manifest 的标识差异，不能把版本字符串相同当作资产一致。
+4. 核对前端实际包 `yuheng-ui` 与 manifest 的标识，不能把版本字符串相同当作资产一致。
 
 ## 资产与入口
 

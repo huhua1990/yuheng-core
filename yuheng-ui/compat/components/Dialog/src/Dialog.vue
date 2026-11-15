@@ -147,6 +147,8 @@ function closedHandler() {
 
 <style lang="scss">
 .com-dialog {
+  max-width: 100%;
+
   .#{$elNamespace}-overlay-dialog {
     display: flex;
     justify-content: center;

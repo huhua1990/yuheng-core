@@ -95,8 +95,8 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
-  if (!formRef) return
-  const valid = await formRef.value.validate()
+  if (!formRef.value) return
+  const valid = await formRef.value.validate(() => {})
   if (!valid) return
   // 提交请求
   formLoading.value = true

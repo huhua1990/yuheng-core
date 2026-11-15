@@ -1,0 +1,89 @@
+table	id	column	previous	recovered
+infra_config	25	name	EAM å¤‡ä»¶å…¥åº“ä¸šåŠ¡ç¼–å·	EAM 备件入库业务编号
+infra_config	25	remark	æº eam_asset_part_goods_in ä¸šåŠ¡ç¼–å·è§„åˆ™	源 eam_asset_part_goods_in 业务编号规则
+infra_config	26	name	EAM è€—æå…¥åº“ä¸šåŠ¡ç¼–å·	EAM 耗材入库业务编号
+infra_config	26	remark	æº eam_asset_consumables_stock_in ä¸šåŠ¡ç¼–å·è§„åˆ™	源 eam_asset_consumables_stock_in 业务编号规则
+infra_config	35	name	EAM èµ„äº§è½¬ç§»ä¸šåŠ¡ç¼–å·	EAM 资产转移业务编号
+infra_config	35	remark	æºèµ„äº§è½¬ç§»åˆ›å»ºå®žé™…å¤ç”¨èµ„äº§å€Ÿç”¨ BO ç¼–å·è§„åˆ™	源资产转移创建实际复用资产借用 BO 编号规则
+system_dict_data	1664	label	å·²ç»´ä¿®	已维修
+system_dict_data	1665	label	æ— æ³•ç»´ä¿®	无法维修
+system_dict_data	1734	label	æ­£å¸¸	正常
+system_dict_data	1735	label	è®¡åˆ’	计划
+system_dict_type	360	name	ç»´ä¿®éªŒæ”¶ç»“æžœç±»åž‹	维修验收结果类型
+system_dict_type	360	remark	EAM ç»´ä¿®éªŒæ”¶ç»“æžœç±»åž‹	EAM 维修验收结果类型
+system_dict_type	378	name	ç›˜ç‚¹è®¡åˆ’ç±»åž‹	盘点计划类型
+system_dict_type	378	remark	EAM ç›˜ç‚¹è®¡åˆ’ç±»åž‹	EAM 盘点计划类型
+system_menu	13276	name	ç»´ä¿®éªŒæ”¶ç¡®è®¤	维修验收确认
+system_menu	13277	name	ç»´ä¿®æ´¾å•	维修派单
+system_menu	13278	name	åº“å­˜å…¥åº“å•æ–°å¢ž	库存入库单新增
+system_menu	13279	name	é‡‡è´­éªŒæ”¶	采购验收
+system_menu	13280	name	é‡‡è´­éªŒæ”¶åˆ é™¤	采购验收删除
+system_menu	13281	name	é‡‡è´­éªŒæ”¶ä¿®æ”¹	采购验收修改
+system_menu	13282	name	é‡‡è´­éªŒæ”¶æ–°å¢ž	采购验收新增
+system_menu	13283	name	é‡‡è´­éªŒæ”¶æŸ¥è¯¢	采购验收查询
+system_menu	13287	name	ç»´ä¿®ç´§æ€¥ç¨‹åº¦	维修紧急程度
+system_menu	13288	name	ç´§æ€¥ç¨‹åº¦åˆ é™¤	紧急程度删除
+system_menu	13289	name	ç´§æ€¥ç¨‹åº¦ä¿®æ”¹	紧急程度修改
+system_menu	13290	name	ç´§æ€¥ç¨‹åº¦æ–°å¢ž	紧急程度新增
+system_menu	13291	name	ç´§æ€¥ç¨‹åº¦æŸ¥è¯¢	紧急程度查询
+system_menu	13295	name	ç»´ä¿®æ•…éšœåˆ†ç±»	维修故障分类
+system_menu	13296	name	ç»´ä¿®æ•…éšœåˆ†ç±»åˆ é™¤	维修故障分类删除
+system_menu	13297	name	ç»´ä¿®æ•…éšœåˆ†ç±»ä¿®æ”¹	维修故障分类修改
+system_menu	13298	name	ç»´ä¿®æ•…éšœåˆ†ç±»æ–°å¢ž	维修故障分类新增
+system_menu	13299	name	ç»´ä¿®æ•…éšœåˆ†ç±»æŸ¥è¯¢	维修故障分类查询
+system_menu	13303	name	ç»´ä¿®æ•…éšœæ¨¡æ¿	维修故障模板
+system_menu	13304	name	ç»´ä¿®æ•…éšœæ¨¡æ¿åˆ é™¤	维修故障模板删除
+system_menu	13305	name	ç»´ä¿®æ•…éšœæ¨¡æ¿ä¿®æ”¹	维修故障模板修改
+system_menu	13306	name	ç»´ä¿®æ•…éšœæ¨¡æ¿æ–°å¢ž	维修故障模板新增
+system_menu	13307	name	ç»´ä¿®æ•…éšœæ¨¡æ¿æŸ¥è¯¢	维修故障模板查询
+system_menu	13311	name	ç»´ä¿®æ‰§è¡Œå•éªŒæ”¶	维修执行单验收
+system_menu	13312	name	åº“å­˜å‡ºåº“å•ç¡®è®¤	库存出库单确认
+system_menu	13313	name	åº“å­˜å‡ºåº“å•æ–°å¢ž	库存出库单新增
+system_menu	13315	name	å¤‡ä»¶å…¥åº“å•æ–°å¢ž	备件入库单新增
+system_menu	13316	name	å¤‡ä»¶å‡ºåº“å•ç¡®è®¤	备件出库单确认
+system_menu	13317	name	å¤‡ä»¶å‡ºåº“å•æ–°å¢ž	备件出库单新增
+system_menu	13319	name	è€—æå…¥åº“å•æ–°å¢ž	耗材入库单新增
+system_menu	13320	name	è€—æå‡ºåº“å•ç¡®è®¤	耗材出库单确认
+system_menu	13321	name	è€—æå‡ºåº“å•æ–°å¢ž	耗材出库单新增
+system_menu	13323	name	åº“å­˜å…¥åº“å•ç¡®è®¤	库存入库单确认
+system_menu	13324	name	å¤‡ä»¶å…¥åº“å•ç¡®è®¤	备件入库单确认
+system_menu	13325	name	è€—æå…¥åº“å•ç¡®è®¤	耗材入库单确认
+system_menu	13326	name	å¤‡ä»¶åˆ†ç±»	备件分类
+system_menu	13327	name	å¤‡ä»¶åˆ†ç±»åˆ é™¤	备件分类删除
+system_menu	13328	name	å¤‡ä»¶åˆ†ç±»ä¿®æ”¹	备件分类修改
+system_menu	13329	name	å¤‡ä»¶åˆ†ç±»æ–°å¢ž	备件分类新增
+system_menu	13330	name	å¤‡ä»¶åˆ†ç±»æŸ¥è¯¢	备件分类查询
+system_menu	13334	name	èµ„äº§æŠ¥åºŸ	资产报废
+system_menu	13335	name	èµ„äº§æŠ¥åºŸæŸ¥è¯¢	资产报废查询
+system_menu	13336	name	èµ„äº§æŠ¥åºŸæ¸…ç†	资产报废清理
+system_menu	13337	name	èµ„äº§æŠ¥åºŸç¡®è®¤	资产报废确认
+system_menu	13338	name	èµ„äº§æŠ¥åºŸåˆ é™¤	资产报废删除
+system_menu	13339	name	èµ„äº§æŠ¥åºŸä¿®æ”¹	资产报废修改
+system_menu	13340	name	èµ„äº§æŠ¥åºŸæ–°å¢ž	资产报废新增
+system_menu	13343	name	èµ„äº§æŠ¥åºŸæ’¤é”€å®¡æ‰¹	资产报废撤销审批
+system_menu	13344	name	èµ„äº§æŠ¥åºŸé€å®¡	资产报废送审
+system_menu	13346	name	å·¡æ£€å¼‚å¸¸å•å¤„ç†	巡检异常单处理
+system_menu	13347	name	ç›˜ç‚¹è®¡åˆ’	盘点计划
+system_menu	13348	name	ç›˜ç‚¹è®¡åˆ’åˆ é™¤	盘点计划删除
+system_menu	13349	name	ç›˜ç‚¹è®¡åˆ’ä¿®æ”¹	盘点计划修改
+system_menu	13350	name	ç›˜ç‚¹è®¡åˆ’æ–°å¢ž	盘点计划新增
+system_menu	13351	name	ç›˜ç‚¹è®¡åˆ’æŸ¥è¯¢	盘点计划查询
+system_menu	13437	name	èµ„äº§åˆ†ç±»çŠ¶æ€æŠ¥è¡¨	资产分类状态报表
+system_menu	13438	name	èµ„äº§åˆ†ç±»çŠ¶æ€æŠ¥è¡¨å¯¼å‡º	资产分类状态报表导出
+system_menu	13439	name	èµ„äº§åˆ†ç±»çŠ¶æ€æŠ¥è¡¨æŸ¥è¯¢	资产分类状态报表查询
+system_menu	13441	name	èµ„äº§åˆ†ç±»æŠ¥è¡¨	资产分类报表
+system_menu	13442	name	èµ„äº§åˆ†ç±»æŠ¥è¡¨å¯¼å‡º	资产分类报表导出
+system_menu	13443	name	èµ„äº§åˆ†ç±»æŠ¥è¡¨æŸ¥è¯¢	资产分类报表查询
+system_menu	13445	name	ç»´ä¿®ä¿å…»å·¡æ£€çœ‹æ¿	维修保养巡检看板
+system_menu	13446	name	ç»´ä¿®ä¿å…»å·¡æ£€çœ‹æ¿æŸ¥è¯¢	维修保养巡检看板查询
+system_menu	13447	name	èµ„äº§æ“ä½œè®°å½•æŠ¥è¡¨	资产操作记录报表
+system_menu	13448	name	èµ„äº§æ“ä½œè®°å½•æŠ¥è¡¨å¯¼å‡º	资产操作记录报表导出
+system_menu	13449	name	èµ„äº§æ“ä½œè®°å½•æŠ¥è¡¨æŸ¥è¯¢	资产操作记录报表查询
+system_menu	13451	name	èµ„äº§æ€»è§ˆ	资产总览
+system_menu	13452	name	èµ„äº§æ€»è§ˆæŸ¥è¯¢	资产总览查询
+system_menu	13453	name	èµ„äº§åˆ†ç±»ç›®å½•æŠ¥è¡¨	资产分类目录报表
+system_menu	13454	name	èµ„äº§åˆ†ç±»ç›®å½•æŠ¥è¡¨å¯¼å‡º	资产分类目录报表导出
+system_menu	13455	name	èµ„äº§åˆ†ç±»ç›®å½•æŠ¥è¡¨æŸ¥è¯¢	资产分类目录报表查询
+system_menu	13457	name	å·¡æ£€ç‚¹æ¬¡æ•°æŠ¥è¡¨	巡检点次数报表
+system_menu	13458	name	å·¡æ£€ç‚¹æ¬¡æ•°æŠ¥è¡¨å¯¼å‡º	巡检点次数报表导出
+system_menu	13459	name	å·¡æ£€ç‚¹æ¬¡æ•°æŠ¥è¡¨æŸ¥è¯¢	巡检点次数报表查询

@@ -8,7 +8,7 @@
 
 Yuheng 已拆分为平台核心、业务模块模板和消费端示例三个独立仓库。需要明确它们的依赖方向和资产所有权，使业务开发者能够选择模板或自行创建模块，同时只依赖发布版 core，并持续采用 core 的前后端开发规范、rules 和 skills。
 
-本设计定义目标架构和治理要求，不在本阶段修改运行时代码、升级迁移工具或同步 demo 快照。现有数据库结构与初始化数据仍以已核实的 SQL 基线为事实；把该基线转换为可运行的 Liquibase 链需要单独实施与验证。
+本设计定义目标架构和治理要求。治理资产、UI 包身份、消费端快照和 UI 边界已有实施；可运行的 Liquibase 迁移链仍需独立实施与验证。现有数据库结构与初始化数据仍以已核实的 SQL 基线为事实，不能把快照等同于可直接导入的迁移。
 
 ## 2. 已确认决策
 
@@ -73,6 +73,10 @@ core 升级流程应至少包括：选择目标版本；更新 Maven/npm 依赖�
 
 生产数据库变更以追加式、可追踪的 Liquibase changeset 表达。已执行 changeset 不得改写；修正通过后续 changeset 完成。外部 SQL 必须被已配置的 changelog 引用并可定位。应用使用一个主入口组合 core 与业务两条迁移链，顺序固定且可检查，避免重复或遗漏。
 
+2026-11-11 已确认的首版 MySQL 空库基线：`yudao_demo*` 示例表暂归 core，并放入独立脚本；Flowable 与 Quartz 表结构由 Liquibase 管理，各自使用独立脚本，并关闭各框架的自动建表/升级。平台初始化数据以历史主快照为范围，单独交付；旧 Java 类名应改为当前实际的 `com.yuheng` 类名，用户后来明确要求保留历史用户密码散列，其他示例密码及相关密钥清除。`system_operate_log.success` 不纳入新库结构。本轮不实施已有库接续，也不将该决定解释为可以修改已有数据库。
+
+数据清洗不得破坏表间引用或把无效值伪装为可用凭据。账号和外部服务须通过部署阶段的安全配置恢复可用性；要验证清洗后数据库约束、管理员初始化、配置读取及任务行为。Quartz 历史快照中的序列化数据和运行状态属于单独审查对象，不应仅替换明文类名后假定可以安全恢复。Flowable 与 Quartz 脚本必须对应实际启用的框架版本并验证运行时版本检查。
+
 core baseline 的生成或切换必须考虑空库安装与已有数据库接入两种场景。已有数据库不得直接重放 create-table 快照；应先核对结构和数据基线，再采用经验证的基线登记/接续策略。不得通过忽略迁移错误或将失败 changeset 标记成功来绕过差异。
 
 数据库方言只在有实际初始化、升级及业务验证证据时声明支持。MySQL 验证不能自动证明 PostgreSQL、DM 或其他方言兼容。模板应标明所需方言及脚本适用范围。
@@ -96,10 +100,10 @@ core baseline 的生成或切换必须考虑空库安装与已有数据库接入
 截至本规格编写时，已检查到：
 
 - core 的 Maven 多模块、`yuheng-server` 和 `yuheng-ui` 包工程已存在；core 主 Java 源码已迁移到 `com.yuheng` 命名空间。
-- core 的发布清单仍有 `@yuheng/platform-ui` 与 `yuheng-ui` 的命名不一致，需要统一为 `yuheng-ui`。
-- demo 的后端只声明版本化 `yuheng-server`，前端当前元数据使用 `yuheng-ui`；demo 默认控制器仍有 `cn.iocoder.yudao.*` import。
+- core 前端包名、发布清单、活动 UI 治理规则和 demo 的本地治理快照已统一为 `yuheng-ui`；Java 命名空间使用 `com.yuheng`。
+- demo 后端通过版本化 `yuheng-server` 消费 core，前端隔离安装验证已使用新打包的 `yuheng-ui` tarball；demo 源码工作树中仍包含用户正在修改的 Java 文件，不能据此断言所有内容均已通过完整构建验证。
 - 业务模板目前以源码目录提供；存在少量旧 Java import，需在模板质量门禁中阻止残留。
-- demo 当前没有业务模块接入结构和应用级 Liquibase 入口。现有 postcheck 与 sync verify 因 demo 缺少 manifest、rules/skills 快照及必需文档目录而返回 `BLOCKED`。
+- demo 已建立 manifest、rules/skills 快照及知识资产结构，并记录本地 core 快照同步验证；其 manifest 来源仍需在正式发布流程中固定到可复现的 core 版本。
 - core 和模板仓库中的 `create_tables.sql` / `clean.sql` 属于测试资源；当前三仓库没有完整可运行的 core baseline + demo business Liquibase 链。
 - ruoyi SQL 基线包含多种数据库方言。core 的数据库盘点已要求先决定首轮方言并建立表归属，不能假设现有快照已可直接转成 Liquibase。
 
@@ -123,7 +127,7 @@ core baseline 的生成或切换必须考虑空库安装与已有数据库接入
 - core rules、skills、knowledge 的消费版本可追溯，demo 的治理检查与固定版本源校验通过。
 - 业务模板一次性复制后可纳入 demo；之后更改由 demo 独立维护，且模板仓库不作为运行依赖。
 - Java 源码中不再有 `cn.iocoder.yudao.*` 引用。
-- demo 存在唯一正式 Liquibase 入口，固定顺序组合 core baseline 与 demo 业务迁移；测试 SQL 和人工运维 SQL 不进入生产主链。
+- demo 存在唯一正式 Liquibase 入口，固定顺序组合 core baseline 与 demo 业务迁移；测试 SQL 和人工运维 SQL不进入生产主链。
 - 至少在声明的首个数据库方言上验证空库初始化、重复执行检查、从指定旧基线升级、失败处理和恢复方案。
 - core 升级验证同时覆盖后端构建、`yuheng-ui` 测试/类型检查/构建、治理同步与 demo 业务数据库迁移。
 

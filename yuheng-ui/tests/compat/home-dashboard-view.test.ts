@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { createRenderer, defineComponent, h, nextTick } from 'vue'
 import { createPinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -55,7 +56,7 @@ const mount = () => {
 
 beforeEach(() => {
   runtime.push.mockReset(); runtime.request.mockReset()
-  runtime.context = { pinia: createPinia(), request: { request: runtime.request } }
+  runtime.context = { pinia: createPinia(), request: { get: runtime.request } }
   const user = useUserStore(runtime.context.pinia)
   user.userInfo = { id: 7, nickname: '测试管理员', avatar: '/test-avatar.png' }; user.loaded = true
   user.permissions = ['system:notice:query']
@@ -74,22 +75,18 @@ describe('complete home view', () => {
     const root = mount(); await settle()
     expect(textOf(root)).toContain('Yuheng')
     expect(textOf(root)).toContain('测试管理员')
-    expect(textOf(root)).toContain('授权模块: 1')
-    expect(textOf(root)).toContain('可访问入口: 1')
-    expect(textOf(root)).toContain('已加载字典: 1')
+    expect(textOf(root)).toContain('授权模块 1')
+    expect(textOf(root)).toContain('可访问入口 1')
+    expect(textOf(root)).toContain('已加载字典 1')
     expect(textOf(root)).toContain('平台真实公告')
-    expect(textOf(root)).toContain('示例图表')
-    expect(runtime.request).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET', url: '/system/notice/page', params: { pageNo: 1, pageSize: 5, status: 0 } }))
-    const charts = all(root).filter((n) => n.type === 'chart')
-    expect(charts).toHaveLength(2)
-    expect(charts[0].props.options.series[0].data).toEqual([{ name: '平台管理', value: 1 }])
+    expect(runtime.request).toHaveBeenCalledWith('/system/notice/page', { params: { pageNo: 1, pageSize: 5, status: 0 } })
     const shortcut = all(root).find((n) => n.type === 'button' && textOf(n).includes('通知公告'))!
     shortcut.props.onClick(); expect(runtime.push).toHaveBeenCalledWith({ name: 'ActualNotice' })
     useUserStore(runtime.context.pinia).userInfo = { nickname: '更新后的用户' }
     useDictStore(runtime.context.pinia).setDictMap({ a: [], b: [] })
     await settle()
     expect(textOf(root)).toContain('更新后的用户')
-    expect(textOf(root)).toContain('已加载字典: 2')
+    expect(textOf(root)).toContain('已加载字典 2')
   })
 
   it('never requests notices without query permission, even if a notice menu exists', async () => {
@@ -134,8 +131,8 @@ describe('complete home view', () => {
     useDictStore(runtime.context.pinia).setDictMap({})
     const root = mount(); await settle()
     expect(textOf(root)).toContain('暂无可访问模块')
-    expect(textOf(root)).toContain('暂无快捷入口')
-    expect(textOf(root)).toContain('已加载字典: 0')
+    expect(textOf(root)).toContain('可访问入口 0')
+    expect(textOf(root)).toContain('已加载字典 0')
     for (const old of ['ruoyi-vue-pro', '20℃', '10w+', '2340', '商城中心']) expect(textOf(root)).not.toContain(old)
   })
 })

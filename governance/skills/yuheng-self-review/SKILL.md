@@ -23,7 +23,7 @@ metadata:
 
 - 用 [知识路由](../yuheng-knowledge-routing/SKILL.md) 核对符号、包导出、依赖和规则差异，不能仅信生成说明。
 - HTTP 方法、路径和参数位置以实际契约为准，防止 GET/PUT/DELETE 被改写成全 POST。
-- 前端包为 `@yuheng/platform-ui`；实际有 `createYuhengRequest`、`installYuhengUi` 和用户/权限/字典 Store。
+- 前端包为 `yuheng-ui`；实际有 `createYuhengRequest`、`installYuhengUi` 和用户/权限/字典 Store。
 - 不导入静态 `request` 或 `useMenuStore`；已有请求复用 `runtime.context.request`，核实解包和调用签名。
 - 后端沿用真实 Service 接口与 Impl，不能一律改为继承 `ServiceImpl`，也不要求固定八类 CRUD 文件。
 - 数据库变更必须有实际脚本、配置及执行依据，不编造 Liquibase 命令，不修改已执行迁移。

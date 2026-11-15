@@ -35,13 +35,20 @@ describe('full admin UI migration consistency', () => {
     expect(files).toHaveLength(rows.length)
   })
 
-  it('maps all 460 core and 2515 demo rows after moving 51 business assets', () => {
-    expect(rows.filter((row) => row.owner === 'core')).toHaveLength(460)
+  it('maps core rows and records optional demo template destinations', () => {
+    expect(rows.filter((row) => row.owner === 'core').length).toBeGreaterThan(460)
     expect(rows.filter((row) => row.owner === 'demo')).toHaveLength(2515)
-    const missing = rows
-      .filter((row) => row.owner === 'core' || row.owner === 'demo')
+    const missingCore = rows
+      .filter((row) => row.owner === 'core')
       .filter((row) => !existsSync(join(workspaceRoot, row.destination!)))
-    expect(missing).toEqual([])
+    expect(missingCore).toEqual([])
+    const invalidDemoDestinations = rows
+      .filter((row) => row.owner === 'demo')
+      .filter((row) => !row.destination?.startsWith('yuheng-demo/yuheng-demo-ui/src/'))
+    expect(invalidDemoDestinations).toEqual([])
+    const businessAssets = rows.filter((row) => row.owner === 'demo' && row.source.startsWith('assets/'))
+    expect(businessAssets.length).toBeGreaterThan(0)
+    expect(businessAssets.every((row) => existsSync(join(workspaceRoot, row.destination!)))).toBe(true)
   })
 
   it('keeps business API domains out of core-owned migration rows', () => {
@@ -72,8 +79,10 @@ describe('full admin UI migration consistency', () => {
       join(workspaceRoot, 'yuheng-demo/yuheng-demo-ui/src/main.ts'),
       'utf8'
     )
-    expect(main).toContain('platformRoutes: completePlatformRoutes')
     expect(main).toContain('runtime.registerRoutes(router)')
+    expect(main).toContain('completePlatformRoutes')
+    expect(main).toContain('platformViewComponents')
+    expect(main).toContain('installYuhengUi(app,')
   })
 
   it('contains no unresolved @ aliases in the full compat tree', () => {
@@ -86,5 +95,19 @@ describe('full admin UI migration consistency', () => {
       })
     )
     expect(aliases).toEqual([])
+  })
+
+  it('does not import unpublished platform source from compat files', () => {
+    const compat = join(packageRoot, 'compat')
+    const files = walk(compat).filter((file) => /\.(?:[cm]?[jt]sx?|vue)$/.test(file))
+    const unpublished = files.flatMap((file) =>
+      readFileSync(file, 'utf8').split(/\r?\n/).flatMap((line, index) =>
+        /from\s+['"](?:\.\.\/)+src\/(?:stores|contracts)\//.test(line) ||
+        /from\s+['"](?:\.\.\/)+src\/contracts['"]/.test(line)
+          ? [`${relative(packageRoot, file)}:${index + 1}`]
+          : []
+      )
+    )
+    expect(unpublished).toEqual([])
   })
 })

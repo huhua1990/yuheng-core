@@ -1,0 +1,49 @@
+table	insert_statements	owner_candidate	seed_disposition	review_status
+infra_api_access_log	0	core-candidate	no seed statements in source snapshot	pending
+infra_api_error_log	0	core-candidate	no seed statements in source snapshot	pending
+infra_codegen_column	0	core-candidate	no seed statements in source snapshot	pending
+infra_codegen_table	0	core-candidate	no seed statements in source snapshot	pending
+infra_config	28	core-candidate	not approved; inspect every row	pending
+infra_data_source_config	0	core-candidate	no seed statements in source snapshot	pending
+infra_file	0	core-candidate	no seed statements in source snapshot	pending
+infra_file_config	11	core-candidate	not approved; inspect every row	pending
+infra_file_content	0	core-candidate	no seed statements in source snapshot	pending
+infra_job	33	core-candidate	not approved; inspect every row	pending
+infra_job_log	0	core-candidate	no seed statements in source snapshot	pending
+system_dept	16	core-candidate	not approved; inspect every row	pending
+system_dict_data	1726	core-candidate	not approved; inspect every row	pending
+system_dict_type	385	core-candidate	not approved; inspect every row	pending
+system_login_log	0	core-candidate	no seed statements in source snapshot	pending
+system_mail_account	4	core-candidate	not approved; inspect every row	pending
+system_mail_log	0	core-candidate	no seed statements in source snapshot	pending
+system_mail_template	3	core-candidate	not approved; inspect every row	pending
+system_menu	2544	core-candidate	not approved; inspect every row	pending
+system_notice	3	core-candidate	not approved; inspect every row	pending
+system_notify_message	95	core-candidate	not approved; inspect every row	pending
+system_notify_template	0	core-candidate	no seed statements in source snapshot	pending
+system_oauth2_access_token	0	core-candidate	no seed statements in source snapshot	pending
+system_oauth2_approve	0	core-candidate	no seed statements in source snapshot	pending
+system_oauth2_client	4	core-candidate	not approved; inspect every row	pending
+system_oauth2_code	0	core-candidate	no seed statements in source snapshot	pending
+system_oauth2_refresh_token	0	core-candidate	no seed statements in source snapshot	pending
+system_operate_log	0	core-candidate	no seed statements in source snapshot	pending
+system_post	4	core-candidate	not approved; inspect every row	pending
+system_role	7	core-candidate	not approved; inspect every row	pending
+system_role_menu	1552	core-candidate	not approved; inspect every row	pending
+system_sms_channel	3	core-candidate	not approved; inspect every row	pending
+system_sms_code	0	core-candidate	no seed statements in source snapshot	pending
+system_sms_log	0	core-candidate	no seed statements in source snapshot	pending
+system_sms_template	16	core-candidate	not approved; inspect every row	pending
+system_social_client	8	core-candidate	not approved; inspect every row	pending
+system_social_user	0	core-candidate	no seed statements in source snapshot	pending
+system_social_user_bind	0	core-candidate	no seed statements in source snapshot	pending
+system_tenant	3	core-candidate	not approved; inspect every row	pending
+system_tenant_package	2	core-candidate	not approved; inspect every row	pending
+system_user_post	11	core-candidate	not approved; inspect every row	pending
+system_user_role	23	core-candidate	not approved; inspect every row	pending
+system_users	21	core-candidate	not approved; inspect every row	pending
+yudao_demo01_contact	1	demo-candidate	not approved; inspect every row	pending
+yudao_demo02_category	7	demo-candidate	not approved; inspect every row	pending
+yudao_demo03_course	17	demo-candidate	not approved; inspect every row	pending
+yudao_demo03_grade	3	demo-candidate	not approved; inspect every row	pending
+yudao_demo03_student	3	demo-candidate	not approved; inspect every row	pending

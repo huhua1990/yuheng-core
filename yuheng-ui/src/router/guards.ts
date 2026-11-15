@@ -2,6 +2,7 @@ import { h } from 'vue'
 import { RouterView, type Router } from 'vue-router'
 import type { MenuNode, PlatformRouteRecord } from '../contracts'
 import type { YuhengUiContext } from '../runtime/options'
+import { resolveMenuComponent } from './platform-routes'
 
 export const DEFAULT_WHITE_LIST = [
   '/login',
@@ -71,14 +72,17 @@ export function filterMenuRoutes(
   return nodes.flatMap((node) => {
     const children = node.children ? filterMenuRoutes(node.children, permissions, resolveComponent) : []
     if (!hasPermission(node.permission, permissions) && children.length === 0) return []
+    const resolvedComponent = node.component
+      ? (resolveComponent?.(node.component.split('?')[0]) ?? resolveMenuComponent(node.component.split('?')[0]))
+      : undefined
     const route: PlatformRouteRecord = {
       name: node.componentName || `${node.name}-${node.id}`,
       path: node.path || `menu-${node.id}`,
-      component: node.component
-        ? (resolveComponent?.(node.component.split('?')[0]) ?? {
-            render: () => h('div', { role: 'alert', class: 'yuheng-ui-page' }, `页面组件未注册：${node.component}`)
-          })
-        : { render: () => h(RouterView) },
+      component: resolvedComponent ?? (children.length > 0
+        ? { render: () => h(RouterView) }
+        : node.component
+          ? { render: () => h('div', { role: 'alert', class: 'yuheng-ui-page' }, `页面组件未注册：${node.component}`) }
+          : { render: () => h(RouterView) }),
       meta: {
         title: node.name,
         icon: node.icon,

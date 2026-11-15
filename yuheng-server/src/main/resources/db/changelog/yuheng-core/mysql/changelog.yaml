@@ -1,0 +1,85 @@
+databaseChangeLog:
+  - changeSet:
+      id: yuheng-mysql-001-platform-schema
+      author: yuheng
+      dbms: mysql
+      changes:
+        - sqlFile:
+            path: 001-platform-schema.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - changeSet:
+      id: yuheng-mysql-002-example-schema
+      author: yuheng
+      dbms: mysql
+      changes:
+        - sqlFile:
+            path: 002-example-schema.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - changeSet:
+      id: yuheng-mysql-003-quartz-schema
+      author: yuheng
+      dbms: mysql
+      changes:
+        - sqlFile:
+            path: 003-quartz-schema.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - changeSet:
+      id: yuheng-mysql-004-flowable-schema
+      author: yuheng
+      dbms: mysql
+      changes:
+        - sqlFile:
+            path: 004-flowable-schema.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - changeSet:
+      id: yuheng-mysql-005-platform-seed
+      author: yuheng
+      dbms: mysql
+      validCheckSum: 9:62b79a8db7f496e7b8f10784bd7437f8
+      changes:
+        - sqlFile:
+            path: 005-platform-seed.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - changeSet:
+      id: yuheng-mysql-006-restore-historical-user-passwords
+      author: yuheng
+      dbms: mysql
+      changes:
+        - sqlFile:
+            path: 006-restore-historical-user-passwords.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - changeSet:
+      id: yuheng-mysql-007-fix-platform-seed-encoding
+      author: yuheng
+      dbms: mysql
+      changes:
+        - sqlFile:
+            path: 007-fix-platform-seed-encoding.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - changeSet:
+      id: yuheng-mysql-008-remove-operate-log-success
+      author: yuheng
+      dbms: mysql
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: system_operate_log
+            columnName: success
+      changes:
+        - sqlFile:
+            path: 008-remove-operate-log-success.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+  - include:
+      file: 009-fix-platform-plan-labels.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 010-clean-orphan-platform-role-menus.yaml
+      relativeToChangelogFile: true

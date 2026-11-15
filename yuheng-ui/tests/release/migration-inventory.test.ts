@@ -34,14 +34,14 @@ describe('admin UI migration inventory', () => {
     expect(invalid.map((row) => row.source)).toEqual([])
   })
 
-  it('keeps all business APIs/views/assets and infra demos outside core ownership', () => {
+  it('keeps business APIs/views/assets outside core ownership', () => {
     const businessCode = new RegExp(`^(?:api|views)/${businessDomain}(?:/|$)`)
     expect(rows.filter((row) => row.owner === 'core' &&
-      (businessCode.test(row.source) || businessAsset.test(row.source) || /^api\/infra\/demo\//.test(row.source))
+      (businessCode.test(row.source) || businessAsset.test(row.source))
     ).map((row) => row.source)).toEqual([])
   })
 
-  it('tracks the nine runtime adapters as real core files and excludes the five infra sample APIs', () => {
+  it('tracks runtime adapters and the five infra sample APIs as core files', () => {
     const adapters = ['config/axios/index.ts', 'config/axios/service.ts', 'router/index.ts',
       'router/modules/remaining.ts', 'store/index.ts', 'store/modules/dict.ts',
       'store/modules/permission.ts', 'store/modules/user.ts', 'utils/auth.ts']
@@ -52,7 +52,13 @@ describe('admin UI migration inventory', () => {
     }
     const samples = rows.filter((row) => /^api\/infra\/demo\//.test(row.source))
     expect(samples).toHaveLength(5)
-    expect(samples.every((row) => row.owner === 'excluded-sample' && row.destination === null)).toBe(true)
+    expect(samples.every((row) => row.owner === 'core' && row.destination === `yuheng-core/yuheng-ui/compat/${row.source}`)).toBe(true)
+    for (const path of ['demo01', 'demo02', 'demo03/erp', 'demo03/inner', 'demo03/normal']) {
+      const source = `views/infra/demo/${path}/index.vue`
+      expect(rows.find((row) => row.source === source)).toEqual({
+        source, owner: 'core', destination: `yuheng-core/yuheng-ui/compat/${source}`
+      })
+    }
   })
 
   it('assigns all 51 business assets to demo while retaining 13 generic platform assets', () => {

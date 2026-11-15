@@ -23,7 +23,7 @@ metadata:
 - 查找同名菜单、路径、组件标识和权限码，复用已有节点；只新增任务需要的目录、页面或按钮节点。
 - 核对实际 `parentId`、`type`、`path`、`component`、`componentName`、状态及可见字段，取值依据现有模型和样例。
 - 从页面组件映射追到动态路由解析与守卫，确认父子路径、名称、布局和刷新时的注册行为。
-- 使用 `@yuheng/platform-ui` 真实的 `usePermissionStore` 和已有 runtime 上下文；不引用 `useMenuStore` 或平行维护权限缓存。
+- 使用 `yuheng-ui` 真实的 `usePermissionStore` 和已有 runtime 上下文；不引用 `useMenuStore` 或平行维护权限缓存。
 - 菜单与权限 API 复用 `runtime.context.request` 或已有已配置包装层；方法以源码为准，更新为 PUT、删除为 DELETE 等不能统一 POST。
 - 角色分配、按钮权限标识和后端鉴权须对应，隐藏按钮不能作为接口拒绝访问的证明。
 - 消费端业务菜单留在消费端；修改 core 公共菜单或权限机制时先核实消费端兼容影响。

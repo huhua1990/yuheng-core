@@ -148,6 +148,7 @@ import * as authUtil from '../../../utils/auth.ts'
 import { usePermissionStore } from '../../../store/modules/permission.ts'
 import * as LoginApi from '../../../api/login/index.ts'
 import { LoginStateEnum, useFormValid, useLoginState } from './useLogin.ts'
+import { submitLogin } from './loginSubmit'
 
 defineOptions({ name: 'LoginForm' })
 
@@ -208,7 +209,8 @@ const getCode = async () => {
 const getTenantId = async () => {
   if (loginData.tenantEnable === 'true') {
     const res = await LoginApi.getTenantIdByName(loginData.loginForm.tenantName)
-    authUtil.setTenantId(res)
+    if (res != null) authUtil.setTenantId(res)
+    return res
   }
 }
 // 记住我
@@ -240,11 +242,12 @@ const loading = ref() // ElLoading.service 返回的实例
 const handleLogin = async (params: any) => {
   loginLoading.value = true
   try {
-    await getTenantId()
-    const data = await validForm()
-    if (!data) {
-      return
-    }
+    await submitLogin({
+      validate: validForm,
+      tenant: getTenantId,
+      tenantRequired: loginData.tenantEnable === 'true',
+      report: (text) => message.error(text),
+      login: async () => {
     const loginDataLoginForm = { ...loginData.loginForm }
     loginDataLoginForm.captchaVerification = params.captchaVerification
     const res = await LoginApi.login(loginDataLoginForm)
@@ -271,6 +274,8 @@ const handleLogin = async (params: any) => {
     } else {
     await push({ path: redirect.value || permissionStore.getAddRouters[0]?.path || '/index' })
     }
+      }
+    })
   } finally {
     loginLoading.value = false
     loading.value?.close()

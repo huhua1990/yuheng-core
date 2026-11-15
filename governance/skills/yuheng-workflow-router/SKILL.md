@@ -15,6 +15,7 @@ metadata:
 | 输入/现状 | 下一步 |
 |---|---|
 | 新建工程、复制模板、计划治理快照刷新 | 先用 [初始化体检](../yuheng-init-project-postcheck/SKILL.md) 的只读检查，再选入口 |
+| 业务模板源码复制、接入或消费流程验证 | 结合当前阶段使用 [业务模板迁移](../yuheng-business-template-migration/SKILL.md) |
 | 报错、异常、功能失效 | 先按 `debug-log-first` 采集日志/复现；精简修复规格和计划后进入交付 |
 | 仅原始想法、会议纪要 | [需求转规格](../yuheng-requirement-to-spec/SKILL.md) |
 | 规格已确认，尚无可执行计划 | [规格转计划](../yuheng-spec-to-plan/SKILL.md) |

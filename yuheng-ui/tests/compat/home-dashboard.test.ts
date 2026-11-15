@@ -34,6 +34,45 @@ describe('complete home platform data', () => {
     expect(buildHomeModules(routes, [])[0].entries.map((entry) => entry.title)).toEqual(['Visible'])
   })
 
+  it('keeps accessible descendants under generated menu groups with a default redirect', () => {
+    const routes = [page('/system', 'System', {
+      redirect: { name: 'UserList' },
+      meta: { title: '系统管理', dynamic: true },
+      children: [page('user', 'UserGroup', {
+        redirect: { name: 'UserList' },
+        children: [page('list', 'UserList', { meta: { title: '用户管理' } })]
+      })]
+    })]
+
+    expect(buildHomeModules(routes, []).flatMap((module) => module.entries.map((entry) => entry.title)))
+      .toEqual(['用户管理'])
+  })
+
+  it('groups shortcut entries by their own top-level menu', () => {
+    const routes = [
+      page('/system', 'System', { meta: { title: '系统管理' }, children: [
+        page('user', 'UserGroup', { redirect: { name: 'UserList' }, children: [
+          page('list', 'UserList', { meta: { title: '用户管理' } })
+        ] })
+      ] }),
+      page('/infra', 'Infra', { meta: { title: '基础设施' }, children: [
+        page('codegen', 'Codegen', { meta: { title: '代码生成' } })
+      ] }),
+      page('/erp', 'Erp', { meta: { title: 'ERP 系统' }, children: [
+        page('product', 'Product', { meta: { title: '产品信息' } })
+      ] })
+    ]
+
+    expect(buildHomeModules(routes, []).map((module) => [
+      module.title,
+      module.entries.map((entry) => entry.title)
+    ])).toEqual([
+      ['系统管理', ['用户管理']],
+      ['基础设施', ['代码生成']],
+      ['ERP 系统', ['产品信息']]
+    ])
+  })
+
   it('keeps an authorized child under a directory with a different permission', () => {
     const routes = [page('/system', 'System', { meta: { permission: 'directory:query' }, children: [
       page('user', 'User', { meta: { permission: 'system:user:query' } })

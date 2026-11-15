@@ -128,7 +128,7 @@ import com.yuheng.platform.framework.common.pojo.CommonResult;
 
 @RestController
 public class UserController {
-    
+
     @PostMapping("/user/list")
     public CommonResult<List<User>> list() {
         return CommonResult.success(userService.list());
@@ -184,5 +184,5 @@ AdminUserDO user = userService.getUser(userId);
 
 ---
 
-**版本**: 0.1.0-SNAPSHOT  
+**版本**: 0.1.0-SNAPSHOT
 **更新时间**: 2026-11-09

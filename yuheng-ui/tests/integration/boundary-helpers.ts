@@ -20,8 +20,7 @@ export function walk(directory: string): string[] {
 
 export function inventory(packageRoot: string): InventoryRow[] {
   return readFileSync(join(packageRoot, 'docs/admin-ui-migration-inventory.ndjson'), 'utf8')
-    .trim().split(/?
-/).map((line) => JSON.parse(line) as InventoryRow)
+    .trim().split(/\r?\n/).map((line) => JSON.parse(line) as InventoryRow)
 }
 
 // Parse real module declarations: prose, comments and import-looking strings are not dependencies.
@@ -29,7 +28,7 @@ export function moduleSpecifiers(file: string, includeTypes = false): string[] {
   if (!/\.(?:[cm]?[jt]sx?|vue)$/.test(file) || (!includeTypes && file.endsWith('.d.ts'))) return []
   const text = readFileSync(file, 'utf8')
   const scripts = file.endsWith('.vue')
-    ? [...text.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1])
+    ? [...text.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1])
     : [text]
   const modules: string[] = []
   for (const script of scripts) {

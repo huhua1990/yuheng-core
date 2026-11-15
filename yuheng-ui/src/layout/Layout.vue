@@ -7,6 +7,9 @@ import { useAppStore } from '../stores/app'
 import { useUserStore } from '../stores/user'
 import { usePermissionStore } from '../stores/permission'
 import { YUHENG_UI_CONTEXT, type YuhengUiContext } from '../runtime/options'
+import type { PlatformRouteRecord } from '../contracts'
+import NavigationBranch from './NavigationBranch.vue'
+import { logoutAndRedirect } from './logout'
 import logoUrl from '../assets/logo.png'
 import avatarUrl from '../assets/avatar.gif'
 
@@ -18,37 +21,22 @@ const router = useRouter()
 const slots = useSlots()
 const sidebarWidth = computed(() => appStore.collapsed ? '64px' : 'var(--yuheng-ui-sidebar-width)')
 const navigationRoutes = computed(() =>
-  permissionStore.getAddRoutes().filter((route) => route.meta?.title && !route.meta?.hidden)
+  permissionStore.getAddRoutes().filter((route) => route.meta?.title && !route.meta?.hidden) as PlatformRouteRecord[]
 )
 const logout = async () => {
   await ElMessageBox.confirm('确认退出登录吗?', '提示', { type: 'warning' })
-  if (context) {
-    await userStore.logout(context)
-    permissionStore.resetRoutes()
-  } else {
-    userStore.userInfo = null
-  }
-  await router.push({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
+  await logoutAndRedirect({ context, userStore, permissionStore, router })
 }
 </script>
 <template>
   <div class="yuheng-ui-shell">
-    <aside v-if="!slots.sidebar" class="yuheng-ui-shell__sidebar" :style="{ width: sidebarWidth }">
+    <aside v-if="!slots.sidebar" class="yuheng-ui-shell__sidebar" :class="{ 'is-collapsed': appStore.collapsed }" :style="{ width: sidebarWidth }">
       <RouterLink to="/" class="yuheng-ui-shell__brand">
         <img class="yuheng-ui-shell__logo" :src="logoUrl" alt="logo" />
         <span v-if="!appStore.collapsed">{{ context?.options.appTitle ?? 'Yuheng' }}</span>
       </RouterLink>
       <nav class="yuheng-ui-shell__navigation" aria-label="主导航">
-        <RouterLink
-          v-for="route in navigationRoutes"
-          :key="String(route.name ?? route.path)"
-          :to="{ name: route.name! }"
-          class="yuheng-ui-shell__nav-link"
-          :title="String(route.meta?.title)"
-        >
-          <span v-if="!appStore.collapsed">{{ route.meta?.title }}</span>
-          <span v-else>{{ String(route.meta?.title).slice(0, 1) }}</span>
-        </RouterLink>
+        <NavigationBranch :routes="navigationRoutes" :collapsed="appStore.collapsed" />
       </nav>
     </aside>
     <slot v-else name="sidebar" />
@@ -56,12 +44,13 @@ const logout = async () => {
       <header class="yuheng-ui-shell__header">
         <slot name="header">
           <div class="yuheng-ui-shell__header-left">
-            <IconifyIcon
+            <button class="yuheng-ui-shell__collapse" type="button" :aria-label="appStore.collapsed ? '展开侧栏' : '收起侧栏'" @click="appStore.toggleCollapsed()">
+              <IconifyIcon
               class="yuheng-ui-shell__collapse"
               :icon="appStore.collapsed ? 'ep:expand' : 'ep:fold'"
               :size="18"
-              @click="appStore.toggleCollapsed()"
-            />
+              />
+            </button>
             <strong>{{ context?.options.appTitle ?? 'Yuheng' }}</strong>
           </div>
           <div class="yuheng-ui-shell__user">
@@ -84,4 +73,4 @@ const logout = async () => {
     </div>
   </div>
 </template>
-<style scoped src="../styles/layout.css"></style>
+<style src="../styles/layout.css"></style>

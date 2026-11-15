@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createMemoryHistory, createRouter } from 'vue-router'
+import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
 import { filterMenuRoutes, registerRoutes, resolveNavigation } from '../../src/router/guards'
 import { createYuhengRouter } from '../../src/router'
 import { platformRoutes } from '../../src/router/platform-routes'
@@ -79,6 +79,23 @@ describe('platform route guards', () => {
 
     expect(routes.map((route) => route.path)).toEqual(['/system'])
     expect(routes[0]?.children?.map((route) => route.path)).toEqual(['/system/user'])
+  })
+
+  it('uses a router outlet for an unresolved menu component with child routes', () => {
+    const routes = filterMenuRoutes([
+      {
+        id: 83,
+        name: '代码生成案例',
+        path: '/infra/demo',
+        component: 'infra/testDemo/index',
+        children: [{ id: 537, name: '单表', path: '/infra/demo/demo01-contact', component: 'infra/demo/demo01/index' }]
+      }
+    ], ['*:*:*'], (key) => key === 'infra/demo/demo01/index' ? { render: () => null } : undefined)
+
+    expect((routes[0]?.component as { render: () => { type: unknown } }).render().type).toBe(RouterView)
+    expect(routes[0]?.children).toHaveLength(1)
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    expect(router.resolve('/infra/demo/demo01-contact').matched).toHaveLength(2)
   })
 
   it('registers dynamic routes only once and resets only dynamic names', async () => {
