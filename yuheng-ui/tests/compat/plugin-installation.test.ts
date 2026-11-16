@@ -43,6 +43,13 @@ afterEach(() => {
 })
 
 describe('Core and compat plugin installation', () => {
+  it('gives compatibility form rules an explicit i18n dependency for package consumers', async () => {
+    const { required } = await import('../../compat/utils/formRules')
+
+    expect(required.required).toBe(true)
+    expect(required.message).toBe('common.required')
+  })
+
   it('reuses the Core i18n instance while adding compat translations', async () => {
     const { app, warnings } = createInstalledApp()
     const coreI18n = (app as typeof app & { __VUE_I18N__?: { global: { t: (key: string) => string } } }).__VUE_I18N__
