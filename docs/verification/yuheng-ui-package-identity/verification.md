@@ -50,6 +50,12 @@ demo 基线：`b9c4906`，包含用户已有的 Java 重命名及未暂存修改
 - Started the fresh consumer's Vite dev server on 5189 and fetched the resolved `formRules.ts` module over HTTP. The response contained `const { t } = useI18n()` without an import, confirming the dev transform gap outside the unit-test harness; the temporary server was stopped afterward. Production bundle output still contains the compiled module import described above.
 - A fresh query of the configured private npm group returned 404 for the fixed version; `npm whoami` returned `ENEEDAUTH`. No publish, credential change, or lockfile edit was performed. Tarball consumer evidence is current, while fixed-coordinate registry consumption remains open.
 
+### Isolated tarball-consumer confirmation
+
+To avoid the incomplete pnpm offline cache, created a clean temporary Demo UI copy, linked only its already-installed dependency store and binaries, and extracted the current tarball directly at that copy's `node_modules/yuheng-ui`. Package metadata reported `yuheng-ui@0.1.0-SNAPSHOT`, and the resolved package directory was inside the temp consumer. No workspace source symlink was used.
+
+The three Demo consumer test files passed 14/14, consumer `vue-tsc --noEmit` passed, and the platform import boundary check passed. A Vite dev server on temporary port 5190 returned the `formRules.ts` module with `import { useI18n } from "/node_modules/yuheng-ui/compat/hooks/web/useI18n.ts?..."` before its use; the server was stopped after the read. This confirms the Core tarball's explicit-import fix works in an actual consumer dev transform. The consumer build is not re-reported here; a matching current workspace-linked Demo production build had already passed 3673 modules.
+
 ### Follow-up: explicit compat i18n dependency
 
 The failing dev transform was traced to `compat/utils/formRules.ts` reading `useI18n()` as a global supplied by Demo's Vite AutoImport plugin. That implicit consumer-side transform is not a valid dependency for a Core-owned compatibility module. Added an explicit import from Core's `compat/hooks/web/useI18n` and a regression test that directly imports `formRules`; the test failed first with `ReferenceError: useI18n is not defined`, then passed after the change.
