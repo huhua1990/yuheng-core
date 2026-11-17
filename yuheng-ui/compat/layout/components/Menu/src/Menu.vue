@@ -263,7 +263,7 @@ export default defineComponent({
       }
       nextTick(() => {
         const menu = unref(menuRef)
-        if (!menu) {
+        if (!menu || unref(collapse)) {
           return
         }
         const nextOpeneds = unref(defaultOpeneds)
