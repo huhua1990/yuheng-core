@@ -10,6 +10,7 @@ import com.yuheng.platform.module.system.dal.dataobject.user.AdminUserDO;
 import com.yuheng.platform.module.system.enums.ErrorCodeConstants;
 import com.yuheng.platform.module.system.service.auth.AdminAuthService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 import java.util.List;
@@ -46,9 +47,11 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public OAuth2AccessTokenDO grantAuthorizationCodeForAccessToken(String clientId, String code,
                                                                     String redirectUri, String state) {
-        OAuth2CodeDO codeDO = oauth2CodeService.consumeAuthorizationCode(code);
+        // Lock the code until all request parameters are validated and token creation completes.
+        OAuth2CodeDO codeDO = oauth2CodeService.getAuthorizationCodeForUpdate(code);
         Assert.notNull(codeDO, "授权码不能为空"); // 防御性编程
         // 校验 clientId 是否匹配
         if (!StrUtil.equals(clientId, codeDO.getClientId())) {
@@ -63,6 +66,9 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
         if (!StrUtil.equals(state, codeDO.getState())) {
             throw exception(ErrorCodeConstants.OAUTH2_GRANT_STATE_MISMATCH);
         }
+
+        // Consume only after every binding check succeeds; transaction rollback preserves it on failure.
+        oauth2CodeService.deleteAuthorizationCode(codeDO.getId());
 
         // 创建访问令牌
         return oauth2TokenService.createAccessToken(codeDO.getUserId(), codeDO.getUserType(),

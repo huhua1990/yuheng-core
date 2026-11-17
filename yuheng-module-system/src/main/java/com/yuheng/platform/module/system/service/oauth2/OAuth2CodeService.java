@@ -30,10 +30,18 @@ public interface OAuth2CodeService {
                                          List<String> scopes, String redirectUri, String state);
 
     /**
-     * 使用授权码
+     * 查询并锁定授权码，调用方必须在事务中完成后续校验和消费。
      *
      * @param code 授权码
+     * @return 授权码信息
      */
-    OAuth2CodeDO consumeAuthorizationCode(String code);
+    OAuth2CodeDO getAuthorizationCodeForUpdate(String code);
+
+    /**
+     * 删除已经完成校验的授权码。
+     *
+     * @param id 授权码编号
+     */
+    void deleteAuthorizationCode(Long id);
 
 }

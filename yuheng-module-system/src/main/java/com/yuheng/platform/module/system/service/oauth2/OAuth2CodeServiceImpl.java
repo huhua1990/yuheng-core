@@ -45,16 +45,20 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
     }
 
     @Override
-    public OAuth2CodeDO consumeAuthorizationCode(String code) {
-        OAuth2CodeDO codeDO = oauth2CodeMapper.selectByCode(code);
+    public OAuth2CodeDO getAuthorizationCodeForUpdate(String code) {
+        OAuth2CodeDO codeDO = oauth2CodeMapper.selectOneForUpdate(OAuth2CodeDO::getCode, code);
         if (codeDO == null) {
             throw exception(OAUTH2_CODE_NOT_EXISTS);
         }
         if (DateUtils.isExpired(codeDO.getExpiresTime())) {
             throw exception(OAUTH2_CODE_EXPIRE);
         }
-        oauth2CodeMapper.deleteById(codeDO.getId());
         return codeDO;
+    }
+
+    @Override
+    public void deleteAuthorizationCode(Long id) {
+        oauth2CodeMapper.deleteById(id);
     }
 
     private static String generateCode() {
