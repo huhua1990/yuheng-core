@@ -19,6 +19,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.yuheng.platform.framework.common.enums.CommonStatusEnum;
 import com.yuheng.platform.framework.common.enums.UserTypeEnum;
+import com.yuheng.platform.framework.common.exception.ServiceException;
 import com.yuheng.platform.framework.common.pojo.PageResult;
 import com.yuheng.platform.framework.common.util.cache.CacheUtils;
 import com.yuheng.platform.framework.common.util.http.HttpUtils;
@@ -170,19 +171,41 @@ public class SocialClientServiceImpl implements SocialClientService {
     @Override
     public String getAuthorizeUrl(Integer socialType, Integer userType, String redirectUri) {
         // 获得对应的 AuthRequest 实现
-        AuthRequest authRequest = buildAuthRequest(socialType, userType);
-        // 生成跳转地址
-        String authorizeUri = authRequest.authorize(AuthStateUtils.createState());
-        return HttpUtils.replaceUrlQuery(authorizeUri, "redirect_uri", redirectUri);
+        AuthRequest authRequest;
+        try {
+            authRequest = buildAuthRequest(socialType, userType);
+            // 生成跳转地址
+            String authorizeUri = authRequest.authorize(AuthStateUtils.createState());
+            return HttpUtils.replaceUrlQuery(authorizeUri, "redirect_uri", redirectUri);
+        } catch (ServiceException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.warn("[getAuthorizeUrl][构建社交平台授权地址失败 type({})]", socialType, ex);
+            throw exception(SOCIAL_USER_AUTH_FAILURE, ex.getMessage());
+        }
     }
 
     @Override
     public AuthUser getAuthUser(Integer socialType, Integer userType, String code, String state) {
         // 构建请求
-        AuthRequest authRequest = buildAuthRequest(socialType, userType);
+        AuthRequest authRequest;
+        try {
+            authRequest = buildAuthRequest(socialType, userType);
+        } catch (ServiceException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.warn("[getAuthUser][构建社交平台请求失败 type({})]", socialType, ex);
+            throw exception(SOCIAL_USER_AUTH_FAILURE, ex.getMessage());
+        }
         AuthCallback authCallback = AuthCallback.builder().code(code).auth_code(code).state(state).build();
         // 执行请求
-        AuthResponse<?> authResponse = authRequest.login(authCallback);
+        AuthResponse<?> authResponse;
+        try {
+            authResponse = authRequest.login(authCallback);
+        } catch (Exception ex) {
+            log.warn("[getAuthUser][请求社交平台失败 type({})]", socialType, ex);
+            throw exception(SOCIAL_USER_AUTH_FAILURE, ex.getMessage());
+        }
         log.info("[getAuthUser][请求社交平台 type({}) request({}) response({})]", socialType,
                 toJsonString(authCallback), toJsonString(authResponse));
         if (!authResponse.ok()) {
@@ -205,8 +228,13 @@ public class SocialClientServiceImpl implements SocialClientService {
      */
     @VisibleForTesting
     AuthRequest buildAuthRequest(Integer socialType, Integer userType) {
+        SocialTypeEnum socialTypeEnum = SocialTypeEnum.valueOfType(socialType);
+        if (socialTypeEnum == null) {
+            throw com.yuheng.platform.framework.common.exception.util.ServiceExceptionUtil
+                    .invalidParamException("社交平台({}) 不存在", socialType);
+        }
         // 1. 先查找默认的配置项，从 application-*.yaml 中读取
-        AuthRequest request = authRequestFactory.get(SocialTypeEnum.valueOfType(socialType).getSource());
+        AuthRequest request = authRequestFactory.get(socialTypeEnum.getSource());
         Assert.notNull(request, String.format("社交平台(%d) 不存在", socialType));
         // 2. 查询 DB 的配置项，如果存在则进行覆盖
         SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(socialType, userType);
