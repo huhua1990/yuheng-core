@@ -39,3 +39,31 @@ metadata:
 - 将变更区分为模板业务修复、Core 接入适配、消费端定制和冲突。保留必要的接入适配，定制不反向合入模板；冲突逐项审查，禁止整目录覆盖。
 - 单独比较数据库 changeset、checksum、执行历史与实际 schema。已执行 changeset 不得改写，模板修复以新 changeset 前向应用。若存在重复、空值、超长或其它不兼容数据，迁移应停止并报告，不自动删除、截断或覆盖数据。
 - 更新结束时记录模板来源版本、应用和保留的差异、迁移状态及验证证据，并运行受影响的构建、测试和隔离数据库验证。不做后台自动同步或静默更新。
+
+### 可复用更新工具
+
+业务模板仓库提供 `tools/template_update.py`。它是消费端的显式更新工具，不是运行时依赖，也不会重建、清空或删除消费工程。消费端为每个模块提供映射 JSON，将模板相对路径映射到自己的源码、资源和 Liquibase 目录，并按需要声明包名替换。
+
+首次接入或确认一个模板版本后，先记录基线：
+
+```bash
+python3 tools/template_update.py \
+  --template-root /path/to/yuheng-business-templates \
+  --consumer-root /path/to/yuheng-demo \
+  --mapping /path/to/erp-mapping.json \
+  --record-state /path/to/erp-template-state.json
+```
+
+模板仓库有变更且使用者明确要求更新时，先只读预览：
+
+```bash
+python3 tools/template_update.py \
+  --template-root /path/to/yuheng-business-templates \
+  --consumer-root /path/to/yuheng-demo \
+  --mapping /path/to/erp-mapping.json \
+  --state /path/to/erp-template-state.json
+```
+
+预览报告至少区分 `template_added`、`template_changed`、`consumer_customized`、`consumer_only`、`conflict` 和 `template_deleted`。只有模板新增或模板单方修改可以进入安全应用；如果基线记录的源文件和消费端文件已经不同，模板后续修改必须归类为 `conflict`，不能覆盖消费端适配。冲突、无法分类的差异和模板删除必须先人工审查。确认后才可增加 `--apply`；模板删除还必须显式增加 `--allow-delete`。应用前后均审查 Git 差异，并运行受影响的模板测试、消费端构建和隔离数据库验证。
+
+数据库文件也按映射参与比较，但更新工具不会修改已执行 changeset、清理 checksum、删除业务数据或自动运行数据库迁移。数据库结构修复必须在模板中新增前向 changeset，由消费端按自己的迁移流程和目标库状态单独审批、执行和验证。消费端的 UI 适配、包名适配、集成开关和其它定制始终保留；模板修复通过此流程选择性带入，不会覆盖整个模块目录。
