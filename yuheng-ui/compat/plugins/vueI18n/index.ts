@@ -42,10 +42,10 @@ export const setupI18n = async (app: App<Element>) => {
     for (const [locale, messages] of Object.entries(options.messages ?? {})) {
       i18n.global.mergeLocaleMessage(locale, messages)
     }
-    i18n.global.locale.value = String(options.locale)
-    i18n.global.fallbackLocale.value = String(options.fallbackLocale)
+    ;(i18n.global.locale as { value: string }).value = String(options.locale)
+    ;(i18n.global.fallbackLocale as { value: string }).value = String(options.fallbackLocale)
     return
   }
-  i18n = createI18n(options) as I18n
+  i18n = createI18n(options)
   app.use(i18n, { globalInstall: false })
 }

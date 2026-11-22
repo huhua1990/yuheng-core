@@ -324,7 +324,6 @@ export const useAppStore = defineStore('app', {
       this.footer = footer
     }
   },
-  persist: false
 })
 
 export const useAppStoreWithOut = () => {

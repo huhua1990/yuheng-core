@@ -80,7 +80,7 @@ export function formatTime(time: Date | number | string, fmt: string) {
   if (!time) return ''
   else {
     const date = new Date(time)
-    const o = {
+    const o: Record<string, number> = {
       'M+': date.getMonth() + 1,
       'd+': date.getDate(),
       'H+': date.getHours(),
@@ -96,7 +96,7 @@ export function formatTime(time: Date | number | string, fmt: string) {
       if (new RegExp('(' + k + ')').test(fmt)) {
         fmt = fmt.replace(
           RegExp.$1,
-          RegExp.$1.length === 1 ? o[k] : ('00' + o[k]).substr(('' + o[k]).length)
+          RegExp.$1.length === 1 ? String(o[k]) : ('00' + o[k]).substr(('' + o[k]).length)
         )
       }
     }
@@ -287,7 +287,7 @@ export const getUrlNumberValue = (key: string, urlStr: string = location.href): 
  * @param prop 字段名称
  * @param order 顺序
  */
-export const buildSortingField = ({ prop, order }) => {
+export const buildSortingField = ({ prop, order }: { prop: string; order: string }) => {
   return { field: prop, order: order === 'ascending' ? 'asc' : 'desc' }
 }
 
@@ -444,7 +444,7 @@ export const erpCountInputFormatter = (num: number | string | undefined) => {
  * @param cellValue 数量
  * @return 格式化后的数量
  */
-export const erpCountTableColumnFormatter = (_, __, cellValue: any, ___) => {
+export const erpCountTableColumnFormatter = (_: unknown, __: unknown, cellValue: number | string | undefined, ___: unknown) => {
   return erpNumberFormatter(cellValue, ERP_COUNT_DIGIT)
 }
 
@@ -467,7 +467,7 @@ export const erpPriceInputFormatter = (num: number | string | undefined) => {
  * @param cellValue 数量
  * @return 格式化后的数量
  */
-export const erpPriceTableColumnFormatter = (_, __, cellValue: any, ___) => {
+export const erpPriceTableColumnFormatter = (_: unknown, __: unknown, cellValue: number | string | undefined, ___: unknown) => {
   return erpNumberFormatter(cellValue, ERP_PRICE_DIGIT)
 }
 

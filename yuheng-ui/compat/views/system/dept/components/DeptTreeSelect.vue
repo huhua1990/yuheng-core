@@ -64,9 +64,9 @@ const loadTree = async () => {
 }
 
 /** 基于名字过滤 */
-const filterNode = (name: string, data: Tree) => {
+const filterNode = (name: string, data: { name?: string }) => {
   if (!name) return true
-  return data.name.includes(name)
+  return data.name?.includes(name) ?? false
 }
 
 /** 监听过滤关键字 */

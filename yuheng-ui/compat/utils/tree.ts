@@ -234,8 +234,9 @@ export const handleTree = (data: any[], id?: string, parentId?: string, children
     childrenList: children || 'children'
   }
 
-  const childrenListMap = {}
-  const nodeIds = {}
+  type TreeNode = Record<string, unknown>
+  const childrenListMap: Record<string | number, TreeNode[]> = {}
+  const nodeIds: Record<string | number, TreeNode> = {}
   const tree: any[] = []
 
   for (const d of data) {
@@ -258,12 +259,14 @@ export const handleTree = (data: any[], id?: string, parentId?: string, children
     adaptToChildrenList(t)
   }
 
-  function adaptToChildrenList(o) {
-    if (childrenListMap[o[config.id]] !== null) {
-      o[config.childrenList] = childrenListMap[o[config.id]]
+  function adaptToChildrenList(o: TreeNode) {
+    const children = childrenListMap[o[config.id] as string | number]
+    if (children) {
+      o[config.childrenList] = children
     }
-    if (o[config.childrenList]) {
-      for (const c of o[config.childrenList]) {
+    const nested = o[config.childrenList] as TreeNode[] | undefined
+    if (nested) {
+      for (const c of nested) {
         adaptToChildrenList(c)
       }
     }
@@ -280,8 +283,7 @@ export const handleTree = (data: any[], id?: string, parentId?: string, children
  * @param {*} children 孩子节点字段 默认 'children'
  * @param {*} rootId 根Id 默认 0
  */
-// @ts-ignore
-export const handleTree2 = (data, id, parentId, children, rootId) => {
+export const handleTree2 = (data: Record<string, unknown>[], id?: string, parentId?: string, children?: string, rootId?: string | number) => {
   id = id || 'id'
   parentId = parentId || 'parentId'
   // children = children || 'children'
@@ -289,15 +291,15 @@ export const handleTree2 = (data, id, parentId, children, rootId) => {
     rootId ||
     Math.min(
       ...data.map((item) => {
-        return item[parentId]
+        return Number(item[parentId])
       })
     ) ||
     0
   // 对源数据深度克隆
-  const cloneData = JSON.parse(JSON.stringify(data))
+  const cloneData = JSON.parse(JSON.stringify(data)) as Record<string, unknown>[]
   // 循环所有项
-  const treeData = cloneData.filter((father) => {
-    const branchArr = cloneData.filter((child) => {
+  const treeData = cloneData.filter((father: Record<string, unknown>) => {
+    const branchArr = cloneData.filter((child: Record<string, unknown>) => {
       // 返回每一项的子级数组
       return father[id] === child[parentId]
     })
@@ -305,7 +307,7 @@ export const handleTree2 = (data, id, parentId, children, rootId) => {
     // 返回第一层
     return father[parentId] === rootId
   })
-  return treeData !== '' ? treeData : data
+  return treeData
 }
 
 /**
@@ -363,7 +365,7 @@ export const checkSelectedNode = (tree: any[], nodeId: any, level = 2): boolean 
  * @param tree 树数据
  * @param nodeId 节点 id
  */
-export const treeToString = (tree: any[], nodeId) => {
+export const treeToString = (tree: any[], nodeId: string | number) => {
   if (typeof tree === 'undefined' || !Array.isArray(tree) || tree.length === 0) {
     console.warn('tree must be an array')
     return ''
@@ -375,7 +377,7 @@ export const treeToString = (tree: any[], nodeId) => {
   }
   let str = ''
 
-  function performAThoroughValidation(arr) {
+  function performAThoroughValidation(arr: any[] | undefined) {
     if (typeof arr === 'undefined' || !Array.isArray(arr) || arr.length === 0) {
       return false
     }

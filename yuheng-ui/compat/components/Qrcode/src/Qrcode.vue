@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+/// <reference path="../../../types/qrcode-module.d.ts" />
 import { computed, nextTick, PropType, ref, unref, watch } from 'vue'
 import QRCode, { QRCodeRenderersOptions } from 'qrcode'
 import { cloneDeep } from 'lodash-es'

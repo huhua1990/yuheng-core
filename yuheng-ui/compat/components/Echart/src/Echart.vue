@@ -31,7 +31,7 @@ const props = defineProps({
   notMerge: propTypes.bool.def(false)
 })
 
-const isDark = computed(() => appStore.getIsDark)
+const isDark = computed(() => appStore.isDark)
 
 const theme = computed(() => {
   const echartTheme: boolean | string = unref(isDark) ? true : 'auto'
@@ -45,7 +45,7 @@ const options = computed(() => {
   })
 })
 
-const elRef = ref<ElRef>()
+const elRef = ref<HTMLElement | null>(null)
 
 let echartRef: Nullable<echarts.ECharts> = null
 
@@ -87,8 +87,8 @@ const resizeHandler = debounce(() => {
   }
 }, 100)
 
-const contentResizeHandler = async (e: TransitionEvent) => {
-  if (e.propertyName === 'width') {
+const contentResizeHandler = async (e: Event) => {
+  if ((e as TransitionEvent).propertyName === 'width') {
     resizeHandler()
   }
 }
@@ -100,13 +100,12 @@ onMounted(() => {
 
   contentEl.value = document.getElementsByClassName(`${variables.namespace}-layout-content`)[0]
   unref(contentEl) &&
-    (unref(contentEl) as Element).addEventListener('transitionend', contentResizeHandler)
+    unref(contentEl)?.addEventListener('transitionend', contentResizeHandler)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeHandler)
-  unref(contentEl) &&
-    (unref(contentEl) as Element).removeEventListener('transitionend', contentResizeHandler)
+    unref(contentEl)?.removeEventListener('transitionend', contentResizeHandler)
 })
 
 onActivated(() => {
