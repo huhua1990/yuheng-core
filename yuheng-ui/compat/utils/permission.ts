@@ -1,5 +1,6 @@
 import { CACHE_KEY, useCache } from '../hooks/web/useCache.ts'
 import { hasPermission } from '../directives/permission/hasPermi.ts'
+import { useI18n } from '../hooks/web/useI18n.ts'
 
 const { t } = useI18n() // 国际化
 

@@ -1,3 +1,4 @@
+import { reactive } from 'vue'
 import { getAllParentPath } from '../../Menu/src/helper.ts'
 import type { RouteMeta } from 'vue-router'
 import { isUrl } from '../../../../utils/is.ts'
