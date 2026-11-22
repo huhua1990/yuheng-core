@@ -18,7 +18,8 @@ metadata:
 
 ## 实施
 
-- 按消费端结构复制选定源码，调整业务包名和导入，保留 `com.yuheng.platform`；接入现有构建、组件、路由、请求实例和运行配置。检查版本化 core 的真实导出及依赖，避免引用 core 工作区源码或假定模板可以独立构建。
+- 按消费端结构复制选定源码，调整业务包名和导入，保留 `com.yuheng.platform`；接入现有构建、组件、路由、请求实例和运行配置。对于 Core 的动态菜单组件解析器，必须把所选模板页面目录纳入消费端实际使用的组件注册表（例如 `businessViewComponents` 中按需 `import.meta.glob('../views/<module>/**/*.{vue,tsx}')`），并确认模板菜单中的 `component` 字符串能解析到页面组件；只复制页面而不注册目录会导致菜单访问落到缺省页。具有显式业务路由的页面还要单独注册顶层/业务路由，并验证刷新和匿名访问行为。检查版本化 core 的真实导出及依赖，避免引用 core 工作区源码或假定模板可以独立构建。
+- 使用 Vite 开发模式消费 Core compat 源码时，检查自动导入插件产生的公开子路径是否又被单独预构建。`setupCompletePlatform` 与页面必须使用同一份语言、请求和运行时状态；将自动导入的 `yuheng-ui/compat/hooks/web/useI18n`、`useMessage`、`useTable`、`useCrudSchemas` 及 `yuheng-ui/compat/utils/formRules`、`dict` 子路径加入 `optimizeDeps.exclude`，与 `yuheng-ui` 一起排除；CommonJS 依赖 `qs` 则通过 `optimizeDeps.include: ['yuheng-ui > qs']` 转换。配置变更后强制重启预构建，实际验证登录中文文案、动态菜单和业务请求；不能把出现 `login.*` 文案键的问题仅通过放宽浏览器定位器绕过。生产构建与开发模式分别验证。
 - 盘点并复制模块运行资源，包括 MyBatis XML、预置 JSON 和流程定义；同步调整 XML 的 namespace、resultType、OGNL 等业务类名，检查消费端 classpath 和 Mapper 扫描配置。流程文件与预置数据只在其业务流程明确要求时导入，不能把文件存在当作已部署或已验证。
 - 将模板已交付的模块迁移随源码复制到消费端，依据原始表结构、实际代码和数据库现状审查业务表、索引、约束和数据，遵守消费端数据库迁移规则并注册统一 Liquibase 入口。模板缺失迁移时记为交付缺口；补齐并验证后再接入。已执行的 changeset 不得改写；未经明确授权不得清理或覆盖现有数据。缺少可信的结构来源时保留未完成状态，不猜测 DDL。
 - 接入所选菜单、权限、字典和租户配置，检查冲突及数据归属；不因历史菜单存在就认定对应模块、表和权限已可用。
