@@ -1,5 +1,6 @@
 import type { App } from 'vue'
 import { useUserStore } from '../../store/modules/user.ts'
+import { useI18n } from '../../hooks/web/useI18n.ts'
 
 const { t } = useI18n() // 国际化
 
