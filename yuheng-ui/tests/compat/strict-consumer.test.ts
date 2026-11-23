@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,6 +8,36 @@ import { describe, expect, it } from 'vitest'
 const root = fileURLToPath(new URL('../..', import.meta.url))
 
 describe('strict compatibility consumer', () => {
+  it('keeps store actions typed through the published package entry point', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'yuheng-package-consumer-'))
+    try {
+      mkdirSync(join(directory, 'node_modules'), { recursive: true })
+      symlinkSync(root, join(directory, 'node_modules/yuheng-ui'), 'dir')
+      for (const dependency of ['pinia', 'vue', 'vue-router', 'pinia-plugin-persistedstate']) {
+        symlinkSync(join(root, 'node_modules', dependency), join(directory, 'node_modules', dependency), 'dir')
+      }
+      writeFileSync(join(directory, 'consumer.ts'), `
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
+import { useTagsViewStore } from 'yuheng-ui/compat/store/modules/tagsView'
+const delView: (view: RouteLocationNormalizedLoaded) => void = useTagsViewStore().delView
+void delView
+`)
+      writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({
+        compilerOptions: {
+          target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler',
+          strict: true, skipLibCheck: true, noEmit: true, allowImportingTsExtensions: true
+        },
+        files: ['consumer.ts']
+      }))
+      const result = spawnSync(process.execPath, [join(root, 'node_modules/vue-tsc/bin/vue-tsc.js'),
+        '--noEmit', '-p', join(directory, 'tsconfig.json')], { encoding: 'utf8' })
+      expect(result.stdout + result.stderr).toBe('')
+      expect(result.status).toBe(0)
+    } finally {
+      rmSync(directory, { recursive: true, force: true })
+    }
+  }, 30_000)
+
   it('checks the real public utilities, stores and chart/dept components without consumer shims', () => {
     const directory = mkdtempSync(join(tmpdir(), 'yuheng-strict-consumer-'))
     try {
