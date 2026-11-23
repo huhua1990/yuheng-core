@@ -799,8 +799,16 @@
     "./compat/router/modules/remaining.ts": "./compat/router/modules/remaining.ts",
     "./compat/router/modules/remaining": "./compat/router/modules/remaining.ts",
     "./compat/styles/*": "./compat/styles/*",
-    "./compat/setup": "./compat/setup.ts",
-    "./compat/platform": "./compat/platform.ts",
+    "./compat/setup": {
+      "types": "./compat/setup.d.ts",
+      "import": "./compat/setup.ts",
+      "default": "./compat/setup.ts"
+    },
+    "./compat/platform": {
+      "types": "./compat/platform.d.ts",
+      "import": "./compat/platform.ts",
+      "default": "./compat/platform.ts"
+    },
     "./compat/runtime": "./compat/runtime.ts"
   },
   "files": [

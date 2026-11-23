@@ -18,11 +18,14 @@ import { handleTree, handleTree2, treeToString } from '${root}/compat/utils/tree
 import { getStrDictOptions } from '${root}/compat/utils/dict'
 import { setupI18n } from '${root}/compat/plugins/vueI18n'
 import { useAppStore } from '${root}/compat/store/modules/app'
+import { useTagsViewStore } from '${root}/compat/store/modules/tagsView'
 import Echart from '${root}/compat/components/Echart/src/Echart.vue'
 import DeptTreeSelect from '${root}/compat/views/system/dept/components/DeptTreeSelect.vue'
+import { Descriptions } from '${root}/compat/components/Descriptions'
 const label: string | undefined = getStrDictOptions('status')[0]?.value
+const closeView = useTagsViewStore().delView
 void [formatTime, buildSortingField, erpPriceTableColumnFormatter, handleTree, handleTree2,
-  treeToString, setupI18n, useAppStore, Echart, DeptTreeSelect, label]
+  treeToString, setupI18n, useAppStore, Echart, DeptTreeSelect, Descriptions, label, closeView]
 `)
       writeFileSync(join(directory, 'auto-imports.d.ts'), `
 export {}
@@ -30,6 +33,8 @@ declare global {
   const computed: typeof import('vue').computed
   const ref: typeof import('vue').ref
   const unref: typeof import('vue').unref
+  const useAttrs: typeof import('vue').useAttrs
+  const useSlots: typeof import('vue').useSlots
   const watch: typeof import('vue').watch
   const onMounted: typeof import('vue').onMounted
   const onBeforeUnmount: typeof import('vue').onBeforeUnmount

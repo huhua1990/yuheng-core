@@ -1,9 +1,9 @@
 import router from '../../router/index.ts'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { getRawRoute } from '../../utils/routerHelper.ts'
+import type {} from '../../types/pinia-plugin'
+import type {} from '../../types/router'
 import { defineStore } from 'pinia'
 import { store } from '../index.ts'
-import { findIndex } from '../../utils/index.ts'
 import { useUserStoreWithOut } from './user.ts'
 
 export interface TagsViewState {
@@ -63,12 +63,11 @@ export const useTagsViewStore = defineStore('tagsView', {
     addCachedView() {
       const cacheMap: Set<string> = new Set()
       for (const v of this.visitedViews) {
-        const item = getRawRoute(v)
-        const needCache = !item.meta?.noCache
+        const needCache = !v.meta?.noCache
         if (!needCache) {
           continue
         }
-        const name = item.name as string
+        const name = v.name as string
         cacheMap.add(name)
       }
       if (Array.from(this.cachedViews).sort().toString() === Array.from(cacheMap).sort().toString())
@@ -92,7 +91,7 @@ export const useTagsViewStore = defineStore('tagsView', {
     // 删除缓存
     delCachedView() {
       const route = router.currentRoute.value
-      const index = findIndex<string>(this.getCachedViews, (v) => v === route.name)
+      const index = this.getCachedViews.findIndex((v) => v === route.name)
       // 需要注释，解决“标签页刷新无效”。相关案例：https://github.com/yudaocode/yudao-ui-admin-vue3/issues/180
       // for (const v of this.visitedViews) {
       //   if (v.name === route.name) {
@@ -130,10 +129,7 @@ export const useTagsViewStore = defineStore('tagsView', {
     },
     // 删除左侧
     delLeftViews(view: RouteLocationNormalizedLoaded) {
-      const index = findIndex<RouteLocationNormalizedLoaded>(
-        this.visitedViews,
-        (v) => v.fullPath === view.fullPath
-      )
+      const index = this.visitedViews.findIndex((v) => v.fullPath === view.fullPath)
       if (index > -1) {
         this.visitedViews = this.visitedViews.filter((v, i) => {
           return v?.meta?.affix || v.fullPath === view.fullPath || i > index
@@ -143,10 +139,7 @@ export const useTagsViewStore = defineStore('tagsView', {
     },
     // 删除右侧
     delRightViews(view: RouteLocationNormalizedLoaded) {
-      const index = findIndex<RouteLocationNormalizedLoaded>(
-        this.visitedViews,
-        (v) => v.fullPath === view.fullPath
-      )
+      const index = this.visitedViews.findIndex((v) => v.fullPath === view.fullPath)
       if (index > -1) {
         this.visitedViews = this.visitedViews.filter((v, i) => {
           return v?.meta?.affix || v.fullPath === view.fullPath || i < index

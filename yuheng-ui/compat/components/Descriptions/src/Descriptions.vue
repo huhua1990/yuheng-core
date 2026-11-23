@@ -37,24 +37,14 @@ const prefixCls = getPrefixCls('descriptions')
 
 const getBindValue = computed(() => {
   const delArr: string[] = ['title', 'message', 'collapse', 'schema', 'data', 'class']
-  const obj = { ...attrs, ...props }
-  for (const key in obj) {
-    if (delArr.indexOf(key) !== -1) {
-      delete obj[key]
-    }
-  }
-  return obj
+  return Object.fromEntries(
+    Object.entries({ ...attrs, ...props }).filter(([key]) => !delArr.includes(key))
+  )
 })
 
 const getBindItemValue = (item: DescriptionsSchema) => {
   const delArr: string[] = ['field']
-  const obj = { ...item }
-  for (const key in obj) {
-    if (delArr.indexOf(key) !== -1) {
-      delete obj[key]
-    }
-  }
-  return obj
+  return Object.fromEntries(Object.entries(item).filter(([key]) => !delArr.includes(key)))
 }
 
 // 折叠

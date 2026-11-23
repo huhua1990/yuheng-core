@@ -20,6 +20,13 @@ class TemplateMigrationUiRegistrationTests(unittest.TestCase):
         self.assertIn("router.addRoute('Home', route)", text)
         self.assertIn("不能挂在", text)
 
+    def test_skill_requires_real_compat_types_and_direct_consumer_dependencies(self):
+        text = SKILL.read_text()
+        self.assertIn("真实 compat 源码", text)
+        self.assertIn("直接依赖", text)
+        self.assertIn("宽松声明", text)
+        self.assertIn("类型检查", text)
+
 
 if __name__ == "__main__":
     unittest.main()

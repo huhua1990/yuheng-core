@@ -31,6 +31,16 @@ describe('release package exports', () => {
     }
   })
 
+  it('ships typed platform entry points while retaining their runtime source targets', () => {
+    for (const name of ['setup', 'platform']) {
+      expect(pkg.exports[`./compat/${name}`]).toEqual({
+        types: `./compat/${name}.d.ts`,
+        import: `./compat/${name}.ts`,
+        default: `./compat/${name}.ts`
+      })
+    }
+  })
+
   it('resolves every actual export and conditional target to an existing packaged file', () => {
     const invalid: string[] = []
     for (const [key, value] of Object.entries(pkg.exports)) {
