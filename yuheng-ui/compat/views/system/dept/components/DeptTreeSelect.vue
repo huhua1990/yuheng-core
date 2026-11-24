@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ElTree } from 'element-plus'
+import { ElTree, type TreeNodeData } from 'element-plus'
 import * as DeptApi from '../../../../api/system/dept/index.ts'
 import { defaultProps, handleTree } from '../../../../utils/tree.ts'
 
@@ -64,9 +64,9 @@ const loadTree = async () => {
 }
 
 /** 基于名字过滤 */
-const filterNode = (name: string, data: { name?: string }) => {
+const filterNode = (name: string, data: TreeNodeData) => {
   if (!name) return true
-  return data.name?.includes(name) ?? false
+  return typeof data.name === 'string' ? data.name.includes(name) : false
 }
 
 /** 监听过滤关键字 */

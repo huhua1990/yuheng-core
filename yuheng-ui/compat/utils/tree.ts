@@ -37,28 +37,28 @@ export const listToTree = <T = any>(list: any[], config: Partial<TreeHelperConfi
   return result
 }
 
-export const treeToList = <T = any>(tree: any, config: Partial<TreeHelperConfig> = {}): T => {
-  config = getConfig(config)
-  const { children } = config
-  const result: any = [...tree]
+export const treeToList = <T = any>(tree: T[], config: Partial<TreeHelperConfig> = {}): T[] => {
+  const { children } = getConfig(config)
+  const result: T[] = [...tree]
   for (let i = 0; i < result.length; i++) {
-    if (!result[i][children!]) continue
-    result.splice(i + 1, 0, ...result[i][children!])
+    const childNodes = (result[i] as Record<string, any>)[children]
+    if (!childNodes) continue
+    result.splice(i + 1, 0, ...childNodes)
   }
   return result
 }
 
 export const findNode = <T = any>(
-  tree: any,
-  func: Fn,
+  tree: T[],
+  func: (node: T) => boolean,
   config: Partial<TreeHelperConfig> = {}
 ): T | null => {
-  config = getConfig(config)
-  const { children } = config
+  const { children } = getConfig(config)
   const list = [...tree]
   for (const node of list) {
     if (func(node)) return node
-    node[children!] && list.push(...node[children!])
+    const childNodes = (node as Record<string, any>)[children]
+    childNodes && list.push(...childNodes)
   }
   return null
 }
@@ -223,7 +223,12 @@ export const eachTree = (treeDatas: any[], callBack: Fn, parentNode = {}) => {
  * @param {*} parentId 父节点字段 默认 'parentId'
  * @param {*} children 孩子节点字段 默认 'children'
  */
-export const handleTree = (data: any[], id?: string, parentId?: string, children?: string) => {
+export const handleTree = <T extends Record<string, any>>(
+  data: T[],
+  id?: string,
+  parentId?: string,
+  children?: string
+): T[] => {
   if (!Array.isArray(data)) {
     console.warn('data must be an array')
     return []
@@ -234,23 +239,25 @@ export const handleTree = (data: any[], id?: string, parentId?: string, children
     childrenList: children || 'children'
   }
 
-  type TreeNode = Record<string, unknown>
-  const childrenListMap: Record<string | number, TreeNode[]> = {}
-  const nodeIds: Record<string | number, TreeNode> = {}
-  const tree: any[] = []
+  type TreeNode = T & Record<string, any>
+  const childrenListMap: Record<string | number, TreeNode[]> = Object.create(null)
+  const nodeIds: Record<string | number, TreeNode> = Object.create(null)
+  const tree: TreeNode[] = []
+  const getKey = (value: unknown): string | number =>
+    typeof value === 'number' ? value : String(value)
 
   for (const d of data) {
-    const parentId = d[config.parentId]
-    if (childrenListMap[parentId] == null) {
-      childrenListMap[parentId] = []
+    const parentKey = getKey(d[config.parentId])
+    if (childrenListMap[parentKey] == null) {
+      childrenListMap[parentKey] = []
     }
-    nodeIds[d[config.id]] = d
-    childrenListMap[parentId].push(d)
+    nodeIds[getKey(d[config.id])] = d
+    childrenListMap[parentKey].push(d)
   }
 
   for (const d of data) {
-    const parentId = d[config.parentId]
-    if (nodeIds[parentId] == null) {
+    const parentKey = getKey(d[config.parentId])
+    if (nodeIds[parentKey] == null) {
       tree.push(d)
     }
   }
@@ -260,9 +267,9 @@ export const handleTree = (data: any[], id?: string, parentId?: string, children
   }
 
   function adaptToChildrenList(o: TreeNode) {
-    const children = childrenListMap[o[config.id] as string | number]
+    const children = childrenListMap[getKey(o[config.id])]
     if (children) {
-      o[config.childrenList] = children
+      ;(o as Record<string, any>)[config.childrenList] = children
     }
     const nested = o[config.childrenList] as TreeNode[] | undefined
     if (nested) {
@@ -287,14 +294,7 @@ export const handleTree2 = (data: Record<string, unknown>[], id?: string, parent
   id = id || 'id'
   parentId = parentId || 'parentId'
   // children = children || 'children'
-  rootId =
-    rootId ||
-    Math.min(
-      ...data.map((item) => {
-        return Number(item[parentId])
-      })
-    ) ||
-    0
+  rootId = rootId ?? (data.length ? Math.min(...data.map((item) => Number(item[parentId]))) : 0)
   // 对源数据深度克隆
   const cloneData = JSON.parse(JSON.stringify(data)) as Record<string, unknown>[]
   // 循环所有项
@@ -365,7 +365,7 @@ export const checkSelectedNode = (tree: any[], nodeId: any, level = 2): boolean 
  * @param tree 树数据
  * @param nodeId 节点 id
  */
-export const treeToString = (tree: any[], nodeId: string | number) => {
+export const treeToString = (tree: Array<Record<string, any>>, nodeId: string | number) => {
   if (typeof tree === 'undefined' || !Array.isArray(tree) || tree.length === 0) {
     console.warn('tree must be an array')
     return ''
@@ -377,7 +377,7 @@ export const treeToString = (tree: any[], nodeId: string | number) => {
   }
   let str = ''
 
-  function performAThoroughValidation(arr: any[] | undefined) {
+  function performAThoroughValidation(arr: any[] | undefined): boolean {
     if (typeof arr === 'undefined' || !Array.isArray(arr) || arr.length === 0) {
       return false
     }

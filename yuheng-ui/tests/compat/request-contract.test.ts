@@ -11,6 +11,7 @@ function typeContract() {
   const user = request.get<{ id: number }>({ url: '/users', params: { page: 1 } })
   user.then(value => value.id.toFixed())
   request.post({ url: '/users', data: { name: 'demo' }, timeout: 1000 })
+  request.get({ url: '/users', timeout: 300000 })
   const download = request.download({ url: '/users/export' })
   download.then(file => file.size.toFixed())
   // @ts-expect-error A URL is required for every request.

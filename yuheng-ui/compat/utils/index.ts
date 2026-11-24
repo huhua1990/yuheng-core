@@ -92,7 +92,7 @@ export function formatTime(time: Date | number | string, fmt: string) {
     if (/(y+)/.test(fmt)) {
       fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
     }
-    for (const k in o) {
+    for (const k of Object.keys(o) as Array<keyof typeof o>) {
       if (new RegExp('(' + k + ')').test(fmt)) {
         fmt = fmt.replace(
           RegExp.$1,
@@ -287,7 +287,7 @@ export const getUrlNumberValue = (key: string, urlStr: string = location.href): 
  * @param prop 字段名称
  * @param order 顺序
  */
-export const buildSortingField = ({ prop, order }: { prop: string; order: string }) => {
+export const buildSortingField = ({ prop, order }: { prop: string; order: string | null }) => {
   return { field: prop, order: order === 'ascending' ? 'asc' : 'desc' }
 }
 
@@ -444,7 +444,7 @@ export const erpCountInputFormatter = (num: number | string | undefined) => {
  * @param cellValue 数量
  * @return 格式化后的数量
  */
-export const erpCountTableColumnFormatter = (_: unknown, __: unknown, cellValue: number | string | undefined, ___: unknown) => {
+export const erpCountTableColumnFormatter = (_row: unknown, _column: unknown, cellValue: number | string | undefined, _cell: unknown) => {
   return erpNumberFormatter(cellValue, ERP_COUNT_DIGIT)
 }
 
@@ -467,7 +467,7 @@ export const erpPriceInputFormatter = (num: number | string | undefined) => {
  * @param cellValue 数量
  * @return 格式化后的数量
  */
-export const erpPriceTableColumnFormatter = (_: unknown, __: unknown, cellValue: number | string | undefined, ___: unknown) => {
+export const erpPriceTableColumnFormatter = (_row: unknown, _column: unknown, cellValue: number | string | undefined, _cell: unknown) => {
   return erpNumberFormatter(cellValue, ERP_PRICE_DIGIT)
 }
 
