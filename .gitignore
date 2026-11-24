@@ -18,3 +18,4 @@ logs/
 # UI package artifacts
 yuheng-ui/node_modules/
 yuheng-ui/dist/
+yuheng-ui/yuheng-ui-*.tgz
