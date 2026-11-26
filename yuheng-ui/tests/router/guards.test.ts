@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createMemoryHistory, createRouter } from 'vue-router'
-import { filterMenuRoutes, resolveNavigation } from '../../src/router/guards'
+import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
+import { filterMenuRoutes, registerRoutes, resolveNavigation } from '../../src/router/guards'
 import { createYuhengRouter } from '../../src/router'
 import { platformRoutes } from '../../src/router/platform-routes'
 
@@ -81,6 +81,23 @@ describe('platform route guards', () => {
     expect(routes[0]?.children?.map((route) => route.path)).toEqual(['/system/user'])
   })
 
+  it('uses a router outlet for an unresolved menu component with child routes', () => {
+    const routes = filterMenuRoutes([
+      {
+        id: 83,
+        name: '代码生成案例',
+        path: '/infra/demo',
+        component: 'infra/testDemo/index',
+        children: [{ id: 537, name: '单表', path: '/infra/demo/demo01-contact', component: 'infra/demo/demo01/index' }]
+      }
+    ], ['*:*:*'], (key) => key === 'infra/demo/demo01/index' ? { render: () => null } : undefined)
+
+    expect((routes[0]?.component as { render: () => { type: unknown } }).render().type).toBe(RouterView)
+    expect(routes[0]?.children).toHaveLength(1)
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    expect(router.resolve('/infra/demo/demo01-contact').matched).toHaveLength(2)
+  })
+
   it('registers dynamic routes only once and resets only dynamic names', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
@@ -104,6 +121,18 @@ describe('platform route guards', () => {
     expect(router.hasRoute('Home')).toBe(true)
   })
 
+  it('registers permission routes as children of the shell', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [...platformRoutes] })
+    const dynamic = { name: 'DynamicUser', path: '/system/dynamic-user', component: { render: () => null } }
+
+    registerRoutes(router, [dynamic], 'Home')
+
+    expect(router.resolve('/system/dynamic-user').matched.map((route) => route.name)).toEqual([
+      'Home',
+      'DynamicUser'
+    ])
+  })
+
   it('disposes the router runtime and blocks later route mutations', () => {
     const router = createRouter({ history: createMemoryHistory(), routes: [] })
     const runtime = createYuhengRouter({ router })
@@ -113,5 +142,45 @@ describe('platform route guards', () => {
       { name: 'AfterDispose', path: '/after-dispose', component: { render: () => null } }
     ])
     expect(router.hasRoute('AfterDispose')).toBe(false)
+  })
+})
+
+describe('duplicate menu names', () => {
+  it('registers parent and child menus that share the same display name', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [...platformRoutes] })
+    const routes = filterMenuRoutes(
+      [
+        {
+          id: 1,
+          name: '日程管理',
+          path: '/schedule',
+          children: [{ id: 2, name: '日程管理', path: '/schedule/list', permission: 'oa:schedule:query' }]
+        }
+      ],
+      ['oa:schedule:query']
+    )
+
+    expect(() => registerRoutes(router, routes, 'Home')).not.toThrow()
+    expect(router.hasRoute('日程管理-1')).toBe(true)
+    expect(router.hasRoute('日程管理-2')).toBe(true)
+    for (let index = 0; index < 3; index += 1) registerRoutes(router, routes, 'Home')
+    expect(router.getRoutes().filter((route) => String(route.name).startsWith('日程管理'))).toHaveLength(2)
+    expect(router.resolve('/schedule/list').matched.map((route) => String(route.name))).toEqual([
+      'Home',
+      '日程管理-1',
+      '日程管理-2'
+    ])
+  })
+
+  it('does not duplicate routes when dynamic menus are registered repeatedly', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [...platformRoutes] })
+    const routes = filterMenuRoutes(
+      [{ id: 9, name: '重复菜单', path: '/repeat', permission: 'repeat:list' }],
+      ['repeat:list']
+    )
+
+    for (let index = 0; index < 3; index += 1) registerRoutes(router, routes, 'Home')
+
+    expect(router.getRoutes().filter((route) => String(route.name).startsWith('重复菜单'))).toHaveLength(1)
   })
 })

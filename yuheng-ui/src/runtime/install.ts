@@ -10,6 +10,7 @@ import { usePermissionStore } from '../stores/permission'
 import { useUserStore } from '../stores/user'
 import { setupYuhengPlugins } from '../plugins'
 import { configureSystemRequest } from '../modules/system/api/request'
+import { YuhengApiError } from '../request/errors'
 
 export interface InstalledYuhengUiRuntime extends YuhengUiRuntime {
   readonly context: YuhengUiContext
@@ -34,7 +35,12 @@ export function installYuhengUi(
         const permissionInfo = await userStore.fetchUserInfo(context)
         await dictStore.fetchDict(context).catch(() => undefined)
         const menus = Array.isArray(permissionInfo.menus) ? permissionInfo.menus : []
-        await permissionStore.generateRoutes(context, menus as MenuNode[], [], 'menus')
+        await permissionStore.generateRoutes(
+          context,
+          menus as MenuNode[],
+          permissionInfo.permissions ?? [],
+          'menus'
+        )
         context.initialized = true
       })().finally(() => {
         context.initialization = undefined
@@ -64,9 +70,24 @@ export function installYuhengUi(
       if (!guardedRouters.has(router)) {
         router.beforeEach(async (to) => {
           if (disposed) return true
-          const result = await resolveNavigation(to.fullPath, createContextNavigation(context))
-          if (context.initialized) registerRoutes(router, permissionStore.getAddRoutes())
-          return result
+          let result: string
+          try {
+            result = await resolveNavigation(to.fullPath, createContextNavigation(context))
+          } catch (error) {
+            if (!(error instanceof YuhengApiError) || error.code !== 401) throw error
+            context.tokenStore.removeToken()
+            context.tenantStore.clearTenantContext()
+            context.initialized = false
+            return `${context.options.loginPath ?? '/login'}?redirect=${encodeURIComponent(to.fullPath)}`
+          }
+          if (context.initialized) {
+            registerRoutes(router, permissionStore.getAddRoutes(), 'Home')
+            const resolved = router.resolve(to.fullPath)
+            if (resolved.name !== to.name || resolved.matched.length !== to.matched.length) {
+              return { path: to.path, query: to.query, hash: to.hash, replace: true }
+            }
+          }
+          return result === to.fullPath ? true : result
         })
         guardedRouters.add(router)
       }

@@ -1,0 +1,64 @@
+# Version: 010; date: 2026-11-16; target: MySQL 8.x.
+# Soft-delete only the 56 platform-seed role-menu rows whose menu rows were never seeded.
+# The seed rows belong to system roles 1/2 in tenant 1; preserve any menu later added with those IDs.
+# Rollback restores only these exact seed identities if the corresponding menu is still absent.
+databaseChangeLog:
+  - changeSet:
+      id: yuheng-mysql-010-clean-orphan-platform-role-menus
+      author: yuheng
+      dbms: mysql
+      preConditions:
+        - onFail: HALT
+        - onError: HALT
+        - tableExists:
+            tableName: system_menu
+        - tableExists:
+            tableName: system_role_menu
+      changes:
+        - sql:
+            splitStatements: true
+            stripComments: false
+            sql: |
+              UPDATE `system_role_menu`
+              SET `deleted` = b'1'
+              WHERE `id` IN (
+                6786, 6787, 6796, 6797, 6826, 6827, 6828, 6829,
+                6832, 6833, 6834, 6835, 6868, 6869, 6870, 6871,
+                6872, 6873, 6874, 6875, 6876, 6877, 6878, 6879,
+                6880, 6881, 6882, 6883, 6884, 6885, 6888, 6889,
+                7803, 7804, 7805, 7806, 7807, 7808, 7809, 7810,
+                7811, 7812, 7813, 7814, 7815, 7816, 7817, 7818,
+                7819, 7820, 7821, 7822, 7823, 7824, 7825, 7826
+              )
+                AND `role_id` IN (1, 2)
+                AND `tenant_id` = 1
+                AND `deleted` = b'0'
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM `system_menu`
+                  WHERE `system_menu`.`id` = `system_role_menu`.`menu_id`
+                );
+      rollback:
+        - sql:
+            splitStatements: true
+            stripComments: false
+            sql: |
+              UPDATE `system_role_menu`
+              SET `deleted` = b'0'
+              WHERE `id` IN (
+                6786, 6787, 6796, 6797, 6826, 6827, 6828, 6829,
+                6832, 6833, 6834, 6835, 6868, 6869, 6870, 6871,
+                6872, 6873, 6874, 6875, 6876, 6877, 6878, 6879,
+                6880, 6881, 6882, 6883, 6884, 6885, 6888, 6889,
+                7803, 7804, 7805, 7806, 7807, 7808, 7809, 7810,
+                7811, 7812, 7813, 7814, 7815, 7816, 7817, 7818,
+                7819, 7820, 7821, 7822, 7823, 7824, 7825, 7826
+              )
+                AND `role_id` IN (1, 2)
+                AND `tenant_id` = 1
+                AND `deleted` = b'1'
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM `system_menu`
+                  WHERE `system_menu`.`id` = `system_role_menu`.`menu_id`
+                );

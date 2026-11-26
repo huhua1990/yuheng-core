@@ -1,0 +1,303 @@
+[
+  {
+    "table": "infra_config",
+    "id": 21,
+    "column": "name",
+    "old": "EAM 保养è®¡åˆ’编号",
+    "new": "EAM 保养计划编号"
+  },
+  {
+    "table": "infra_job",
+    "id": 12909,
+    "column": "name",
+    "old": "EAM 周期保养è®¡åˆ’",
+    "new": "EAM 周期保养计划"
+  },
+  {
+    "table": "system_dict_data",
+    "id": 1428,
+    "column": "label",
+    "old": "日è®¡åˆ’",
+    "new": "日计划"
+  },
+  {
+    "table": "system_dict_data",
+    "id": 1429,
+    "column": "label",
+    "old": "周è®¡åˆ’",
+    "new": "周计划"
+  },
+  {
+    "table": "system_dict_data",
+    "id": 1430,
+    "column": "label",
+    "old": "月è®¡åˆ’",
+    "new": "月计划"
+  },
+  {
+    "table": "system_dict_type",
+    "id": 127,
+    "column": "name",
+    "old": "MES 排班è®¡åˆ’状态",
+    "new": "MES 排班计划状态"
+  },
+  {
+    "table": "system_dict_type",
+    "id": 127,
+    "column": "remark",
+    "old": "MES 日历排班 - 排班è®¡åˆ’状态",
+    "new": "MES 日历排班 - 排班计划状态"
+  },
+  {
+    "table": "system_dict_type",
+    "id": 250,
+    "column": "name",
+    "old": "HRM 绩效è®¡åˆ’状态",
+    "new": "HRM 绩效计划状态"
+  },
+  {
+    "table": "system_dict_type",
+    "id": 303,
+    "column": "name",
+    "old": "OA è®¡åˆ’类型",
+    "new": "OA 计划类型"
+  },
+  {
+    "table": "system_dict_type",
+    "id": 304,
+    "column": "name",
+    "old": "OA è®¡åˆ’状态",
+    "new": "OA 计划状态"
+  },
+  {
+    "table": "system_menu",
+    "id": 511,
+    "column": "name",
+    "old": "回款è®¡åˆ’",
+    "new": "回款计划"
+  },
+  {
+    "table": "system_menu",
+    "id": 512,
+    "column": "name",
+    "old": "回款è®¡åˆ’查询",
+    "new": "回款计划查询"
+  },
+  {
+    "table": "system_menu",
+    "id": 513,
+    "column": "name",
+    "old": "回款è®¡åˆ’创建",
+    "new": "回款计划创建"
+  },
+  {
+    "table": "system_menu",
+    "id": 514,
+    "column": "name",
+    "old": "回款è®¡åˆ’更新",
+    "new": "回款计划更新"
+  },
+  {
+    "table": "system_menu",
+    "id": 515,
+    "column": "name",
+    "old": "回款è®¡åˆ’删除",
+    "new": "回款计划删除"
+  },
+  {
+    "table": "system_menu",
+    "id": 516,
+    "column": "name",
+    "old": "回款è®¡åˆ’导出",
+    "new": "回款计划导出"
+  },
+  {
+    "table": "system_menu",
+    "id": 1019,
+    "column": "name",
+    "old": "排班è®¡åˆ’",
+    "new": "排班计划"
+  },
+  {
+    "table": "system_menu",
+    "id": 1020,
+    "column": "name",
+    "old": "排班è®¡åˆ’查询",
+    "new": "排班计划查询"
+  },
+  {
+    "table": "system_menu",
+    "id": 1021,
+    "column": "name",
+    "old": "排班è®¡åˆ’创建",
+    "new": "排班计划创建"
+  },
+  {
+    "table": "system_menu",
+    "id": 1022,
+    "column": "name",
+    "old": "排班è®¡åˆ’更新",
+    "new": "排班计划更新"
+  },
+  {
+    "table": "system_menu",
+    "id": 1023,
+    "column": "name",
+    "old": "排班è®¡åˆ’删除",
+    "new": "排班计划删除"
+  },
+  {
+    "table": "system_menu",
+    "id": 1024,
+    "column": "name",
+    "old": "排班è®¡åˆ’导出",
+    "new": "排班计划导出"
+  },
+  {
+    "table": "system_menu",
+    "id": 1587,
+    "column": "name",
+    "old": "绩效è®¡åˆ’查询",
+    "new": "绩效计划查询"
+  },
+  {
+    "table": "system_menu",
+    "id": 1588,
+    "column": "name",
+    "old": "绩效è®¡åˆ’新增",
+    "new": "绩效计划新增"
+  },
+  {
+    "table": "system_menu",
+    "id": 1589,
+    "column": "name",
+    "old": "绩效è®¡åˆ’修改",
+    "new": "绩效计划修改"
+  },
+  {
+    "table": "system_menu",
+    "id": 1590,
+    "column": "name",
+    "old": "绩效è®¡åˆ’删除",
+    "new": "绩效计划删除"
+  },
+  {
+    "table": "system_menu",
+    "id": 8220,
+    "column": "name",
+    "old": "è®¡åˆ’管理",
+    "new": "计划管理"
+  },
+  {
+    "table": "system_menu",
+    "id": 8221,
+    "column": "name",
+    "old": "è®¡åˆ’新增",
+    "new": "计划新增"
+  },
+  {
+    "table": "system_menu",
+    "id": 8222,
+    "column": "name",
+    "old": "è®¡åˆ’修改",
+    "new": "计划修改"
+  },
+  {
+    "table": "system_menu",
+    "id": 8223,
+    "column": "name",
+    "old": "è®¡åˆ’删除",
+    "new": "计划删除"
+  },
+  {
+    "table": "system_menu",
+    "id": 8224,
+    "column": "name",
+    "old": "è®¡åˆ’点评",
+    "new": "计划点评"
+  },
+  {
+    "table": "system_menu",
+    "id": 8225,
+    "column": "name",
+    "old": "è®¡åˆ’管理",
+    "new": "计划管理"
+  },
+  {
+    "table": "system_menu",
+    "id": 8226,
+    "column": "name",
+    "old": "è®¡åˆ’报表",
+    "new": "计划报表"
+  },
+  {
+    "table": "system_menu",
+    "id": 12947,
+    "column": "name",
+    "old": "巡检è®¡åˆ’",
+    "new": "巡检计划"
+  },
+  {
+    "table": "system_menu",
+    "id": 12948,
+    "column": "name",
+    "old": "保养è®¡åˆ’",
+    "new": "保养计划"
+  },
+  {
+    "table": "system_menu",
+    "id": 13054,
+    "column": "name",
+    "old": "巡检è®¡åˆ’删除",
+    "new": "巡检计划删除"
+  },
+  {
+    "table": "system_menu",
+    "id": 13055,
+    "column": "name",
+    "old": "巡检è®¡åˆ’修改",
+    "new": "巡检计划修改"
+  },
+  {
+    "table": "system_menu",
+    "id": 13056,
+    "column": "name",
+    "old": "巡检è®¡åˆ’新增",
+    "new": "巡检计划新增"
+  },
+  {
+    "table": "system_menu",
+    "id": 13057,
+    "column": "name",
+    "old": "巡检è®¡åˆ’查询",
+    "new": "巡检计划查询"
+  },
+  {
+    "table": "system_menu",
+    "id": 13061,
+    "column": "name",
+    "old": "保养è®¡åˆ’删除",
+    "new": "保养计划删除"
+  },
+  {
+    "table": "system_menu",
+    "id": 13062,
+    "column": "name",
+    "old": "保养è®¡åˆ’修改",
+    "new": "保养计划修改"
+  },
+  {
+    "table": "system_menu",
+    "id": 13063,
+    "column": "name",
+    "old": "保养è®¡åˆ’新增",
+    "new": "保养计划新增"
+  },
+  {
+    "table": "system_menu",
+    "id": 13064,
+    "column": "name",
+    "old": "保养è®¡åˆ’查询",
+    "new": "保养计划查询"
+  }
+]

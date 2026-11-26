@@ -9,6 +9,8 @@ import {
   platformRoutes,
   registerPlatformRoutes
 } from '../../src/index'
+import { systemRoutes } from '../../src/modules/system/routes'
+import { infraRoutes } from '../../src/modules/infra/routes'
 import type {
   ApiResponse,
   MenuNode,
@@ -35,10 +37,13 @@ describe('yuheng-ui public contract', () => {
     expect(response.data.ready).toBe(true)
     expect(menu.children).toEqual([])
     expect(options.apiBaseUrl).toBe('/api')
-    const names = platformRoutes.map((item) => String(item.name))
-    expect(names.slice(0, 5)).toEqual(['Login', 'Error', 'Redirect', 'Profile', 'Home'])
-    expect(names).toContain('SystemUser')
-    expect(names).toContain('InfraConfig')
+    const names = platformRoutes.flatMap((item) => [
+      String(item.name),
+      ...(item.children ?? []).map((child) => String(child.name))
+    ])
+    expect(names.slice(0, 6)).toEqual(['Login', 'Error', 'Redirect', 'Home', 'HomeDashboard', 'Profile'])
+    expect(systemRoutes.some((route) => route.name === 'SystemUser')).toBe(true)
+    expect(infraRoutes.some((route) => route.name === 'InfraConfig')).toBe(true)
     expect(new Set(names).size).toBe(names.length)
     const request = createYuhengRequest({ apiBaseUrl: '/api' })
     expect(request.get).toBeTypeOf('function')

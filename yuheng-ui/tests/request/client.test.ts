@@ -16,6 +16,29 @@ function response<T>(config: AxiosResponse['config'], data: T, status = 200): Ax
 }
 
 describe('createYuhengRequest', () => {
+  it('keeps an anonymous request separate from the current login session', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'access', refreshToken: 'refresh', tenantId: 'tenant', visitTenantId: 'visit' })
+    const adapter = new RecordingAdapter(async (config) => response(config, { code: 401, data: null, msg: 'expired share' }, 401))
+    const refreshToken = vi.fn()
+    const onUnauthorized = vi.fn()
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api', tenantEnabled: true, tokenStore: tokens,
+      adapter: adapter.adapter, refreshToken, onUnauthorized
+    })
+
+    await expect(request.get('/pms/kb/document-share/get-by-token', { headers: { isToken: false } })).rejects.toMatchObject({ code: 401 })
+
+    expect(adapter.requests).toHaveLength(1)
+    expect(adapter.requests[0].config.headers.Authorization).toBeUndefined()
+    expect(adapter.requests[0].config.headers.isToken).toBeUndefined()
+    expect(adapter.requests[0].config.headers['visit-tenant-id']).toBeUndefined()
+    expect(adapter.requests[0].config.headers['tenant-id']).toBe('tenant')
+    expect(refreshToken).not.toHaveBeenCalled()
+    expect(onUnauthorized).not.toHaveBeenCalled()
+    expect(tokens.getAccessToken()).toBe('access')
+  })
+
   it('injects auth and tenant headers while whitelisting login URLs', async () => {
     const tokens = new MemoryTokenStore()
     tokens.setToken({ accessToken: 'access', tenantId: 'tenant', visitTenantId: 'visit' })

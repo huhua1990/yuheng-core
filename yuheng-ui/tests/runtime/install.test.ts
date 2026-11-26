@@ -6,6 +6,8 @@ import { usePermissionStore } from '../../src/stores/permission'
 import { useUserStore } from '../../src/stores/user'
 import { createBrowserTenantStore } from '../../src/auth/tenant'
 import { MemoryTokenStore } from '../helpers/memory-token-store'
+import { createYuhengRequest } from '../../src/request'
+import { YuhengApiError } from '../../src/request/errors'
 
 describe('installYuhengUi', () => {
   it('installs into an existing app without creating or mounting another app', () => {
@@ -48,6 +50,161 @@ describe('installYuhengUi', () => {
     first.dispose()
     second.dispose()
   })
+
+  it('uses backend permissions when constructing dynamic menu routes', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'access' })
+    const runtime = installYuhengUi(createApp(defineComponent({})), {
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      request: {
+        get: async (url: string) => url.includes('permission-info')
+          ? { user: { id: 1 }, permissions: ['system:user:list'], menus: [
+              { id: 1, name: '用户管理', path: '/system/user', component: 'SystemUser', permission: 'system:user:list' }
+            ] }
+          : []
+      } as never
+    })
+    await runtime.context.initialize?.()
+    const permissions = usePermissionStore(runtime.context.pinia)
+    expect(permissions.getAddRoutes().map((route) => route.path)).toContain('/system/user')
+    runtime.dispose()
+  })
+
+  it('finishes initial navigation at login when there is no session', async () => {
+    const runtime = installYuhengUi(createApp(defineComponent({})), {
+      apiBaseUrl: '/api',
+      tokenStore: new MemoryTokenStore()
+    })
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    runtime.registerRoutes(router)
+    router.onError(vi.fn())
+
+    await expect(router.push('/')).resolves.toBeUndefined()
+    await router.isReady()
+
+    expect(router.currentRoute.value.name).toBe('Login')
+    expect(router.currentRoute.value.query.redirect).toBe('/')
+    runtime.dispose()
+  })
+
+  it('allows direct login navigation with a redirect query', async () => {
+    const runtime = installYuhengUi(createApp(defineComponent({})), {
+      apiBaseUrl: '/api',
+      tokenStore: new MemoryTokenStore()
+    })
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    runtime.registerRoutes(router)
+    router.onError(vi.fn())
+
+    await expect(router.push('/login?redirect=%2Fprofile')).resolves.toBeUndefined()
+
+    expect(router.currentRoute.value.name).toBe('Login')
+    expect(router.currentRoute.value.query.redirect).toBe('/profile')
+    runtime.dispose()
+  })
+
+  it('continues authenticated navigation without redirecting to the same path', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'access' })
+    const get = vi.fn(async (url: string) => url.includes('permission-info')
+      ? { user: { id: 1 }, permissions: [], menus: [] }
+      : [])
+    const runtime = installYuhengUi(createApp(defineComponent({})), {
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      request: { get } as never
+    })
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    runtime.registerRoutes(router)
+    router.onError(vi.fn())
+
+    await expect(router.push('/profile?tab=security')).resolves.toBeUndefined()
+    await router.isReady()
+    expect(router.currentRoute.value.fullPath).toBe('/profile?tab=security')
+    await expect(router.push('/login')).resolves.toBeUndefined()
+
+    expect(router.currentRoute.value.name).toBe('HomeDashboard')
+    expect(get.mock.calls.filter(([url]) => url.includes('permission-info'))).toHaveLength(1)
+    runtime.dispose()
+  })
+
+  it('recovers initial navigation after stored credentials fail to refresh', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'expired', refreshToken: 'expired-refresh' })
+    const tenant = createBrowserTenantStore()
+    tenant.setTenantContext({ tenantId: 'tenant' })
+    const request = createYuhengRequest({
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      tenantStore: tenant,
+      adapter: async (config) => ({
+        data: { code: 401, msg: '账号未登录', data: null },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config
+      })
+    })
+    const runtime = installYuhengUi(createApp(defineComponent({})), {
+      apiBaseUrl: '/api', tokenStore: tokens, tenantStore: tenant, request
+    })
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    runtime.registerRoutes(router)
+    router.onError(vi.fn())
+
+    await expect(router.push('/profile?tab=security')).resolves.toBeUndefined()
+    await router.isReady()
+
+    expect(router.currentRoute.value.name).toBe('Login')
+    expect(router.currentRoute.value.query.redirect).toBe('/profile?tab=security')
+    expect(tokens.getAccessToken()).toBeUndefined()
+    expect(tokens.getRefreshToken()).toBeUndefined()
+    expect(tenant.getTenantContext()).toEqual({})
+    expect(runtime.context.initialized).toBe(false)
+    runtime.dispose()
+  })
+
+  it('clears rejected credentials from an injected request before redirecting', async () => {
+    const tokens = new MemoryTokenStore()
+    tokens.setToken({ accessToken: 'expired', refreshToken: 'expired-refresh' })
+    const runtime = installYuhengUi(createApp(defineComponent({})), {
+      apiBaseUrl: '/api',
+      tokenStore: tokens,
+      request: { get: async () => { throw new YuhengApiError('Unauthorized', 401) } } as never
+    })
+    const router = createRouter({ history: createMemoryHistory(), routes: [] })
+    runtime.registerRoutes(router)
+    router.onError(vi.fn())
+
+    await expect(router.push('/')).resolves.toBeUndefined()
+
+    expect(router.currentRoute.value.name).toBe('Login')
+    expect(tokens.getAccessToken()).toBeUndefined()
+    runtime.dispose()
+  })
+
+  it.each([new Error('Network unavailable'), new YuhengApiError('Server unavailable', 500)])(
+    'preserves non-authentication initialization errors: %s', async (error) => {
+      const tokens = new MemoryTokenStore()
+      tokens.setToken({ accessToken: 'access' })
+      const runtime = installYuhengUi(createApp(defineComponent({})), {
+        apiBaseUrl: '/api',
+        tokenStore: tokens,
+        request: { get: async () => { throw error } } as never
+      })
+      const router = createRouter({ history: createMemoryHistory(), routes: [] })
+      runtime.registerRoutes(router)
+      const onError = vi.fn()
+      router.onError(onError)
+
+      await expect(router.push('/')).rejects.toBe(error)
+
+      expect(onError).toHaveBeenCalledWith(error, expect.anything(), expect.anything())
+      expect(tokens.getAccessToken()).toBe('access')
+      runtime.dispose()
+    }
+  )
 
   it('makes existing router guards inert after disposal', async () => {
     const app = createApp(defineComponent({}))

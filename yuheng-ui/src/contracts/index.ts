@@ -22,6 +22,7 @@ export interface YuhengUiOptions {
   locale?: PlatformLocale
   icons?: Record<string, unknown>
   platformRoutes?: PlatformRouteRecord[]
+  resolveComponent?: (key: string) => PlatformRouteRecord['component'] | undefined
   onUnauthorized?: (reason: UnauthorizedReason) => void
   onApiError?: (error: YuhengApiError) => void
   request?: YuhengRequest
@@ -42,6 +43,10 @@ export interface MenuNode {
   name: string
   path?: string
   component?: string
+  componentName?: string
+  icon?: string
+  visible?: boolean
+  keepAlive?: boolean
   permission?: string
   children?: MenuNode[]
 }

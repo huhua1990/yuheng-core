@@ -11,7 +11,7 @@ import { createDefaultTenantStore, type TenantContext, type TenantStore } from '
 import { createDefaultTokenStore, type TokenPair, type TokenSnapshot, type TokenStore } from '../auth/token'
 import { YuhengApiError } from './errors'
 
-type RetryConfig = InternalAxiosRequestConfig & { __yuhengRetried?: boolean; __yuhengOriginal?: boolean }
+type RetryConfig = InternalAxiosRequestConfig & { __yuhengRetried?: boolean; __yuhengOriginal?: boolean; __yuhengAnonymous?: boolean }
 class RefreshFailure extends Error {
   constructor(
     readonly reason: UnauthorizedReason,
@@ -164,7 +164,7 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
     const body = response.data
     const config = response.config as RetryConfig
     const code = response.status === 401 ? 401 : isEnvelope(body) ? body.code : response.status
-    if (code === 401 && isAuthFreeEndpoint(config.url ?? '')) {
+    if (code === 401 && (config.__yuhengAnonymous || isAuthFreeEndpoint(config.url ?? ''))) {
       if (isEnvelope(body)) {
         throw new YuhengApiError(body.msg || 'Unauthorized', 401, body)
       }
@@ -193,14 +193,21 @@ export function createYuhengRequest(options: YuhengRequestOptions): YuhengReques
   instance.interceptors.request.use((config) => {
     const url = config.url ?? ''
     const headers = config.headers
-    if (!isAuthFreeEndpoint(url)) {
+    const anonymous = headers.get('isToken') === false
+    if (anonymous) {
+      ;(config as RetryConfig).__yuhengAnonymous = true
+      headers.delete('isToken')
+      headers.delete('Authorization')
+      headers.delete('visit-tenant-id')
+    }
+    if (!anonymous && !isAuthFreeEndpoint(url)) {
       const accessToken = tokenStore.getAccessToken()
       if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
     }
     if (options.tenantEnabled) {
       const context = getTenantContext()
       if (context.tenantId) headers.set('tenant-id', context.tenantId)
-      if (context.visitTenantId && tokenStore.getAccessToken()) {
+      if (!anonymous && context.visitTenantId && tokenStore.getAccessToken()) {
         headers.set('visit-tenant-id', context.visitTenantId)
       }
     }

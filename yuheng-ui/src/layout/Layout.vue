@@ -1,37 +1,76 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, useSlots } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
+import { ElMessageBox } from 'element-plus'
+import { Icon as IconifyIcon } from '@iconify/vue'
 import { useAppStore } from '../stores/app'
 import { useUserStore } from '../stores/user'
 import { usePermissionStore } from '../stores/permission'
 import { YUHENG_UI_CONTEXT, type YuhengUiContext } from '../runtime/options'
+import type { PlatformRouteRecord } from '../contracts'
+import NavigationBranch from './NavigationBranch.vue'
+import { logoutAndRedirect } from './logout'
+import logoUrl from '../assets/logo.png'
+import avatarUrl from '../assets/avatar.gif'
 
 const context = inject<YuhengUiContext | undefined>(YUHENG_UI_CONTEXT)
 const appStore = context ? useAppStore(context.pinia) : useAppStore()
 const userStore = context ? useUserStore(context.pinia) : useUserStore()
 const permissionStore = context ? usePermissionStore(context.pinia) : usePermissionStore()
 const router = useRouter()
+const slots = useSlots()
 const sidebarWidth = computed(() => appStore.collapsed ? '64px' : 'var(--yuheng-ui-sidebar-width)')
+const navigationRoutes = computed(() =>
+  permissionStore.getAddRoutes().filter((route) => route.meta?.title && !route.meta?.hidden) as PlatformRouteRecord[]
+)
 const logout = async () => {
-  if (context) {
-    await userStore.logout(context)
-    permissionStore.resetRoutes()
-  } else {
-    userStore.userInfo = null
-  }
-  await router.push('/login')
+  await ElMessageBox.confirm('确认退出登录吗?', '提示', { type: 'warning' })
+  await logoutAndRedirect({ context, userStore, permissionStore, router })
 }
 </script>
 <template>
-  <div class="yuheng-ui-shell" style="display:flex;min-height:100%;width:100%">
-    <aside class="yuheng-ui-shell__sidebar" :style="{ width: sidebarWidth, transition: 'width .2s' }">
-      <slot name="sidebar"><div style="padding:16px;font-weight:600">Yuheng</div></slot>
+  <div class="yuheng-ui-shell">
+    <aside v-if="!slots.sidebar" class="yuheng-ui-shell__sidebar" :class="{ 'is-collapsed': appStore.collapsed }" :style="{ width: sidebarWidth }">
+      <RouterLink to="/" class="yuheng-ui-shell__brand">
+        <img class="yuheng-ui-shell__logo" :src="logoUrl" alt="logo" />
+        <span v-if="!appStore.collapsed">{{ context?.options.appTitle ?? 'Yuheng' }}</span>
+      </RouterLink>
+      <nav class="yuheng-ui-shell__navigation" aria-label="主导航">
+        <NavigationBranch :routes="navigationRoutes" :collapsed="appStore.collapsed" />
+      </nav>
     </aside>
-    <div style="display:flex;flex:1;flex-direction:column;min-width:0">
-      <header class="yuheng-ui-shell__header" style="height:var(--yuheng-ui-header-height);display:flex;align-items:center;padding:0 16px;gap:12px">
-        <slot name="header"><span style="font-weight:600">{{ userStore.userInfo?.nickname ?? 'Yuheng' }}</span><button type="button" @click="appStore.toggleCollapsed()">☰</button><button type="button" @click="logout">退出</button></slot>
+    <slot v-else name="sidebar" />
+    <div class="yuheng-ui-shell__main">
+      <header class="yuheng-ui-shell__header">
+        <slot name="header">
+          <div class="yuheng-ui-shell__header-left">
+            <button class="yuheng-ui-shell__collapse" type="button" :aria-label="appStore.collapsed ? '展开侧栏' : '收起侧栏'" @click="appStore.toggleCollapsed()">
+              <IconifyIcon
+              class="yuheng-ui-shell__collapse"
+              :icon="appStore.collapsed ? 'ep:expand' : 'ep:fold'"
+              :size="18"
+              />
+            </button>
+            <strong>{{ context?.options.appTitle ?? 'Yuheng' }}</strong>
+          </div>
+          <div class="yuheng-ui-shell__user">
+            <el-dropdown>
+              <span class="yuheng-ui-shell__user-trigger">
+                <el-avatar :size="26" :src="avatarUrl" />
+                {{ userStore.userInfo?.nickname ?? userStore.userInfo?.username }}
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="router.push('/profile')">个人中心</el-dropdown-item>
+                  <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </slot>
       </header>
-      <main style="flex:1;min-width:0"><slot><RouterView /></slot></main>
+      <main class="yuheng-ui-shell__content"><slot><RouterView /></slot></main>
     </div>
   </div>
 </template>
+<style src="../styles/layout.css"></style>

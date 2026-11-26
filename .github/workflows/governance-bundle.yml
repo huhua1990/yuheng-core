@@ -8,6 +8,11 @@ on:
       - 'ai-knowledge-core/**'
       - 'release/**'
       - 'tools/governance/**'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - '.agents/**'
+      - '.claude/**'
+      - '.qoder/**'
   pull_request:
     branches: [main]
     paths:
@@ -15,6 +20,11 @@ on:
       - 'ai-knowledge-core/**'
       - 'release/**'
       - 'tools/governance/**'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - '.agents/**'
+      - '.claude/**'
+      - '.qoder/**'
   workflow_dispatch:
 
 permissions:
@@ -26,6 +36,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Test governance tools and agent entrypoints
+        run: |
+          python3 -m unittest discover -s tools/governance/tests -v
+          python3 tools/governance/sync_agent_assets.py --check
 
       - name: Verify manifest and bundle
         run: |

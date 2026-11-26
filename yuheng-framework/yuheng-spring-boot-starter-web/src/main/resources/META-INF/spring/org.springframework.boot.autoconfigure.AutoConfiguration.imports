@@ -1,7 +1,7 @@
-cn.iocoder.yudao.framework.apilog.config.YudaoApiLogAutoConfiguration
-cn.iocoder.yudao.framework.jackson.config.YudaoJacksonAutoConfiguration
-cn.iocoder.yudao.framework.swagger.config.YudaoSwaggerAutoConfiguration
-cn.iocoder.yudao.framework.web.config.YudaoWebAutoConfiguration
-cn.iocoder.yudao.framework.xss.config.YudaoXssAutoConfiguration
-cn.iocoder.yudao.framework.banner.config.YudaoBannerAutoConfiguration
-cn.iocoder.yudao.framework.encrypt.config.YudaoApiEncryptAutoConfiguration
+com.yuheng.platform.framework.apilog.config.YudaoApiLogAutoConfiguration
+com.yuheng.platform.framework.jackson.config.YudaoJacksonAutoConfiguration
+com.yuheng.platform.framework.swagger.config.YudaoSwaggerAutoConfiguration
+com.yuheng.platform.framework.web.config.YudaoWebAutoConfiguration
+com.yuheng.platform.framework.xss.config.YudaoXssAutoConfiguration
+com.yuheng.platform.framework.banner.config.YudaoBannerAutoConfiguration
+com.yuheng.platform.framework.encrypt.config.YudaoApiEncryptAutoConfiguration
