@@ -62,7 +62,7 @@ export const deleteSmsTemplateList = (ids: number[]) => {
 }
 
 // 导出短信模板
-export const exportSmsTemplate = (params) => {
+export const exportSmsTemplate = (params: PageParam) => {
   return request.download({
     url: '/system/sms-template/export-excel',
     params

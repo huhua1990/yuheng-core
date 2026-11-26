@@ -41,6 +41,9 @@ export const createFile = (data: any) => {
 }
 
 // 上传文件
-export const updateFile = (data: any, onUploadProgress?: Function) => {
+export const updateFile = (
+  data: any,
+  onUploadProgress?: Parameters<typeof request.upload>[0]['onUploadProgress']
+) => {
   return request.upload({ url: '/infra/file/upload', data, onUploadProgress })
 }

@@ -45,7 +45,7 @@ export const deleteDictTypeList = (ids: number[]) => {
 }
 
 // 导出字典
-export const exportDictType = (params) => {
+export const exportDictType = (params: PageParam) => {
   return request.download({
     url: '/system/dict-type/export-excel',
     params

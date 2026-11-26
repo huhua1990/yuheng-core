@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { CSSProperties } from 'vue'
+import type { CSSProperties } from 'vue'
+import type { TabsPaneContext } from 'element-plus'
 import { cloneDeep } from 'lodash-es'
 import { IconJson } from './data.ts'
 
@@ -17,11 +18,11 @@ const props = defineProps({
     type: Boolean
   }
 })
-const emit = defineEmits<{ (e: 'update:modelValue', v: string) }>()
+const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>()
 
 const visible = ref(false)
 const inputValue = toRef(props, 'modelValue')
-const iconList = ref(IconJson)
+const iconList = ref<Record<string, string[]>>(IconJson)
 const icon = ref('add-location')
 const currentActiveType = ref('ep:')
 // 深拷贝图标数据，前端做搜索
@@ -79,20 +80,21 @@ const iconItemStyle = computed((): ParameterCSSProperties => {
   }
 })
 
-function handleClick({ props }) {
+function handleClick({ props }: TabsPaneContext) {
+  if (typeof props.name !== 'string') return
   currentPage.value = 1
   currentActiveType.value = props.name
   emit('update:modelValue', currentActiveType.value + iconList.value[currentActiveType.value][0])
   icon.value = iconList.value[currentActiveType.value][0]
 }
 
-function onChangeIcon(item) {
+function onChangeIcon(item: string) {
   icon.value = item
   emit('update:modelValue', currentActiveType.value + item)
   visible.value = false
 }
 
-function onCurrentChange(page) {
+function onCurrentChange(page: number) {
   currentPage.value = page
 }
 

@@ -107,7 +107,7 @@ declare global {
     }
   }, 30_000)
 
-  it('checks the real public utilities, stores and chart/dept components without consumer shims', () => {
+  it('checks the real public utilities, stores and chart/dept/icon components without consumer shims', () => {
     const directory = mkdtempSync(join(tmpdir(), 'yuheng-strict-consumer-'))
     try {
       symlinkSync(join(root, 'node_modules'), join(directory, 'node_modules'), 'dir')
@@ -119,20 +119,37 @@ import { setupI18n } from '${root}/compat/plugins/vueI18n'
 import { useAppStore } from '${root}/compat/store/modules/app'
 import { useTagsViewStore } from '${root}/compat/store/modules/tagsView'
 import Echart from '${root}/compat/components/Echart/src/Echart.vue'
+import MarkdownView from '${root}/compat/components/MarkdownView/index.vue'
 import DeptTreeSelect from '${root}/compat/views/system/dept/components/DeptTreeSelect.vue'
 import { Descriptions } from '${root}/compat/components/Descriptions'
+import { Icon, IconSelect } from '${root}/compat/components/Icon'
+import { updateFile } from '${root}/compat/api/infra/file'
+import { Dialog } from '${root}/compat/components/Dialog'
+import { UploadFile, UploadImg } from '${root}/compat/components/UploadFile'
+import Pagination from '${root}/compat/components/Pagination/index.vue'
+import { exportSmsTemplate } from '${root}/compat/api/system/sms/smsTemplate'
+import { exportDictType } from '${root}/compat/api/system/dict/dict.type'
+import { exportPost } from '${root}/compat/api/system/post'
+type IsAny<T> = 0 extends (1 & T) ? true : false
+const dictExportParamsAreTyped: false = null as unknown as IsAny<Parameters<typeof exportDictType>[0]>
+const postExportParamsAreTyped: false = null as unknown as IsAny<Parameters<typeof exportPost>[0]>
 const label: string | undefined = getStrDictOptions('status')[0]?.value
 const sortingEvent: { prop: string; order: string | null } = { prop: 'createTime', order: 'ascending' }
 if (sortingEvent.order) buildSortingField(sortingEvent)
 const closeView = useTagsViewStore().delView
 void [formatTime, buildSortingField, erpPriceTableColumnFormatter, handleTree, handleTree2,
-  treeToString, setupI18n, useAppStore, Echart, DeptTreeSelect, Descriptions, label, closeView]
+  treeToString, setupI18n, useAppStore, Echart, MarkdownView, DeptTreeSelect, Descriptions, Icon, IconSelect,
+  updateFile, Dialog, UploadFile, UploadImg, Pagination, exportSmsTemplate, exportDictType, exportPost,
+  dictExportParamsAreTyped, postExportParamsAreTyped, label, closeView]
 `)
       writeFileSync(join(directory, 'auto-imports.d.ts'), `
 export {}
 declare global {
   const computed: typeof import('vue').computed
   const ref: typeof import('vue').ref
+  const nextTick: typeof import('vue').nextTick
+  const useI18n: typeof import('${root}/compat/hooks/web/useI18n').useI18n
+  const toRef: typeof import('vue').toRef
   const unref: typeof import('vue').unref
   const useAttrs: typeof import('vue').useAttrs
   const useSlots: typeof import('vue').useSlots
@@ -140,6 +157,7 @@ declare global {
   const onMounted: typeof import('vue').onMounted
   const onBeforeUnmount: typeof import('vue').onBeforeUnmount
   const onActivated: typeof import('vue').onActivated
+  const useMessage: typeof import('${root}/compat/hooks/web/useMessage').useMessage
 }
 `)
       writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({

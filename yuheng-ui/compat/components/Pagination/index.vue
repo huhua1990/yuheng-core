@@ -72,7 +72,7 @@ const pageSize = computed({
     emit('update:limit', val)
   }
 })
-const handleSizeChange = (val) => {
+const handleSizeChange = (val: number) => {
   // 如果修改后超过最大页面，强制跳转到第 1 页
   if (currentPage.value * val > props.total) {
     currentPage.value = 1
@@ -80,7 +80,7 @@ const handleSizeChange = (val) => {
   // 触发 pagination 事件，重新加载列表
   emit('pagination', { page: currentPage.value, limit: val })
 }
-const handleCurrentChange = (val) => {
+const handleCurrentChange = (val: number) => {
   // 触发 pagination 事件，重新加载列表
   emit('pagination', { page: val, limit: pageSize.value })
 }

@@ -46,6 +46,6 @@ export const deletePostList = async (ids: number[]) => {
 }
 
 // 导出岗位
-export const exportPost = async (params) => {
+export const exportPost = async (params: PageParam) => {
   return await request.download({ url: '/system/post/export-excel', params })
 }

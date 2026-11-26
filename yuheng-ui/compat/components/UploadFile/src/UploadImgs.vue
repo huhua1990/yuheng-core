@@ -42,6 +42,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { toRaw } from 'vue'
 import type { UploadFile, UploadProps, UploadUserFile } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import { createImageViewer } from '../../ImageViewer/index.ts'

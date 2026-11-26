@@ -67,6 +67,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { toRaw } from 'vue'
 import { propTypes } from '../../../utils/propTypes.ts'
 import type { UploadProps, UploadRawFile, UploadUserFile } from 'element-plus'
 import { isString } from '../../../utils/is.ts'
@@ -118,7 +119,8 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
   }
   const isAllowedType =
     props.fileType.length === 0 ||
-    props.fileType.some((type: string) => {
+    props.fileType.some((type) => {
+      if (typeof type !== 'string') return false
       if (file.type.indexOf(type) > -1) return true
       return !!(fileExtension && fileExtension.indexOf(type) > -1)
     })

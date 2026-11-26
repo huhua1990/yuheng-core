@@ -20,12 +20,13 @@ const message = useMessage() // 消息弹窗
 const { copy } = useClipboard({ legacy: true }) // 初始化 copy 到粘贴板
 const contentRef = ref()
 
+const markdownUtils = new MarkdownIt().utils
 const md = new MarkdownIt({
-  highlight: function (str, lang) {
+  highlight(str: string, lang: string): string {
     // 语言标记、代码正文和复制内容均来自不可信输入，输出 HTML 前必须转义
-    const languageHtml = `<span style="position: absolute; left: 10px; top: 5px; color: #fff;">${md.utils.escapeHtml(lang || 'text')}</span>`
-    const copyHtml = `<div id="copy" data-copy="${md.utils.escapeHtml(str)}" style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
-    let codeHtml = md.utils.escapeHtml(str)
+    const languageHtml = `<span style="position: absolute; left: 10px; top: 5px; color: #fff;">${markdownUtils.escapeHtml(lang || 'text')}</span>`
+    const copyHtml = `<div id="copy" data-copy="${markdownUtils.escapeHtml(str)}" style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
+    let codeHtml = markdownUtils.escapeHtml(str)
     if (lang && hljs.getLanguage(lang)) {
       try {
         codeHtml = hljs.highlight(lang, str, true).value
