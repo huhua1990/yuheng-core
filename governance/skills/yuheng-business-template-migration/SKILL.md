@@ -48,15 +48,18 @@ metadata:
 
 业务模板仓库提供 `tools/template_update.py`。它是消费端的显式更新工具，不是运行时依赖，也不会重建、清空或删除消费工程。消费端为每个模块提供映射 JSON，将模板相对路径映射到自己的源码、资源和 Liquibase 目录，并按需要声明包名替换。映射可以声明 `consumerDependencies`；工具预览时会原样输出依赖清单和版本来源。使用者选择模板后，应逐项检查并按需把依赖加入承载模板代码的消费端模块，确认其版本能由当前 Core BOM 或消费端既有版本目录解析，再运行构建。此步骤只调整已选择模块所需的消费端构建接线，不会自动改 POM，也不为未选择的模块引入依赖。
 
-首次接入或确认一个模板版本后，先记录基线：
+首次接入或确认一个模板版本后，可执行应用并记录基线（注意：单独使用 `--record-state` 仅记录现状基线而不会写入模板文件；首次初始化需配合 `--apply` 或先 `--apply` 再 `--record-state`）：
 
 ```bash
 python3 tools/template_update.py \
   --template-root /path/to/yuheng-business-templates \
   --consumer-root /path/to/yuheng-demo \
   --mapping /path/to/erp-mapping.json \
+  --apply \
   --record-state /path/to/erp-template-state.json
 ```
+
+若新增模板的 `consumerDependencies.npm` 修改了消费端 `package.json`，且消费端使用独立 `pnpm-lock.yaml` 并位于父级 workspace 目录内，需使用 `CI=true pnpm --dir <ui-dir> --ignore-workspace install --no-frozen-lockfile --ignore-scripts` 刷新锁文件，避免触发交互式提示或与根 workspace 冲突。
 
 模板仓库有变更且使用者明确要求更新时，先只读预览：
 
