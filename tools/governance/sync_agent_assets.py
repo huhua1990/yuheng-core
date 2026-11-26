@@ -22,6 +22,10 @@ def _same_content(source: Path, target: Path) -> bool:
 
 def _resolve_path(path: Path) -> Path:
     try:
+        try:
+            path.stat()
+        except FileNotFoundError:
+            pass
         return path.resolve()
     except (OSError, RuntimeError) as exc:
         raise ValueError("cannot safely resolve path: {} ({})".format(path, exc)) from exc
